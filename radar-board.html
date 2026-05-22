@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📡 Radar Board</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0f1117;
+  --surface: #161b22;
+  --surface-inset: #0d1117;
+  --border: #21262d;
+  --border-bright: #30363d;
+
+  --text: #e6edf3;
+  --text-2: #8b949e;
+  --text-3: #484f58;
+
+  --fire:  #f0883e;
+  --bolt:  #58a6ff;
+  --bulb:  #3fb950;
+
+  --watch-color:   #ffd33d;
+  --discuss-color: #58a6ff;
+  --dismiss-color: #da3633;
+
+  --active-bg: #1f6feb;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, 'PingFang SC', 'SF Pro Text', 'Inter', sans-serif;
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Header ── */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(15,17,23,0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.header-logo { font-size: 22px; }
+.header-title { font-size: 17px; font-weight: 600; color: var(--text); }
+.header-meta { font-size: 12px; color: var(--text-3); margin-left: auto; }
+
+/* ── Filter bar ── */
+.filter-bar {
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(15,17,23,0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+.chips-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.fchip {
+  padding: 5px 13px;
+  border-radius: 20px;
+  border: 1px solid var(--border-bright);
+  background: transparent;
+  color: var(--text-2);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.fchip:hover { border-color: var(--text-3); color: var(--text); }
+.fchip.active { background: var(--active-bg); border-color: var(--active-bg); color: #fff; font-weight: 600; }
+.search {
+  margin-left: auto;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border-bright);
+  background: var(--surface-inset);
+  color: var(--text);
+  font-size: 13px;
+  outline: none;
+  width: 200px;
+  transition: border-color .15s;
+  flex-shrink: 0;
+}
+.search:focus { border-color: var(--active-bg); }
+.search::placeholder { color: var(--text-3); }
+
+/* ── Stats ── */
+.statsbar {
+  padding: 8px 24px;
+  display: flex;
+  gap: 20px;
+  font-size: 12px;
+  color: var(--text-3);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+.statsbar b { color: var(--text); }
+
+/* ── Grid ── */
+.grid-wrap { padding: 20px 24px; }
+.date-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-3);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  margin-top: 6px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+/* ── Card ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  transition: border-color .18s ease, transform .18s ease, box-shadow .18s ease;
+  overflow: hidden;
+  position: relative;
+}
+.card:hover {
+  border-color: var(--border-bright);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,.3);
+}
+
+/* grade accent bar */
+.card::before {
+  content: '';
+  display: block;
+  height: 3px;
+  width: 100%;
+  flex-shrink: 0;
+}
+.card.grade-fire::before { background: var(--fire); }
+.card.grade-bolt::before { background: var(--bolt); }
+.card.grade-bulb::before { background: var(--bulb); }
+
+/* status border */
+.card.st-watching  { border-color: rgba(255,211,61,.35); }
+.card.st-discussed { border-color: rgba(88,166,255,.35); }
+.card.st-dismissed { }
+
+.card-body { padding: 16px 16px 0; flex: 1; }
+
+/* grade badge */
+.grade-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  padding: 3px 9px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+.grade-badge.fire { background: rgba(240,136,62,.12); color: var(--fire); }
+.grade-badge.bolt { background: rgba(88,166,255,.12); color: var(--bolt); }
+.grade-badge.bulb { background: rgba(63,185,80,.12); color: var(--bulb); }
+
+.card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.4;
+  margin-bottom: 9px;
+  text-decoration: none;
+  display: block;
+}
+.card-title:hover { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+
+.card-desc {
+  font-size: 13px;
+  color: var(--text-2);
+  line-height: 1.7;
+  margin-bottom: 10px;
+}
+
+/* why 块 */
+.card-why {
+  font-size: 13px;
+  color: var(--text-2);
+  background: var(--surface-inset);
+  border-left: 2px solid var(--border-bright);
+  padding: 8px 12px;
+  border-radius: 0 6px 6px 0;
+  margin-bottom: 12px;
+  line-height: 1.7;
+}
+.card-why-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-3);
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+/* tags row */
+.card-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; }
+.ctag {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--surface-inset);
+  color: var(--text-2);
+  border: 1px solid var(--border);
+}
+.ctag.new   { color: var(--bulb); border-color: rgba(63,185,80,.25); }
+.ctag.stars { color: #ffd33d; border-color: rgba(255,211,61,.25); }
+.ctag.source { color: var(--bolt); border-color: rgba(88,166,255,.25); }
+
+/* expand toggle */
+.expand-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: var(--text-2);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 12px;
+  transition: color .12s;
+}
+.expand-btn:hover { color: var(--text); }
+.expand-arrow { transition: transform .2s; display: inline-block; font-size: 10px; }
+.expand-arrow.open { transform: rotate(90deg); }
+
+.card-extra {
+  font-size: 13px;
+  color: var(--text-2);
+  background: var(--surface-inset);
+  border-top: 1px solid var(--border);
+  padding: 12px 16px;
+  line-height: 1.7;
+  display: none;
+}
+.card-extra.open { display: block; }
+.card-extra ul { padding-left: 16px; }
+.card-extra li { margin-bottom: 6px; color: var(--text-2); }
+
+/* action bar */
+.card-actions {
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-top: 1px solid var(--border);
+}
+.action-btn {
+  padding: 4px 11px;
+  border-radius: 6px;
+  border: 1px solid var(--border-bright);
+  background: transparent;
+  color: var(--text-2);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all .15s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.action-btn:hover { border-color: var(--text-3); color: var(--text); background: rgba(255,255,255,.04); }
+.action-btn.on-watch   { border-color: rgba(255,211,61,.5);  background: rgba(255,211,61,.08);  color: var(--watch-color); }
+.action-btn.on-discuss { border-color: rgba(88,166,255,.5);  background: rgba(88,166,255,.08);  color: var(--discuss-color); }
+.action-btn.on-dismiss { border-color: rgba(218,54,51,.5);   background: rgba(218,54,51,.08);   color: var(--dismiss-color); }
+.card-link {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--text-3);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  transition: color .12s;
+}
+.card-link:hover { color: var(--text-2); }
+
+.empty { text-align: center; padding: 80px; color: var(--text-3); font-size: 15px; }
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  /* Header: compact single row + inline stats */
+  .header {
+    padding: 12px;
+    gap: 8px;
+  }
+  .header-logo { font-size: 18px; }
+  .header-title { font-size: 18px; }
+  .header-meta { font-size: 11px; }
+
+  /* Stats bar: single line, inline text */
+  .statsbar {
+    padding: 6px 12px;
+    display: block;
+    font-size: 11px;
+    white-space: nowrap;
+    overflow-x: auto;
+  }
+  .statsbar span { display: inline; }
+  .statsbar span + span::before { content: ' · '; color: var(--text-3); }
+  .statsbar span:last-child { margin-left: 0; }
+
+  /* Filter bar: stack search + chips vertically */
+  .filter-bar {
+    padding: 8px 12px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  /* Search: full width */
+  .search {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  /* Chips: horizontal scroll, no wrap */
+  .chips-row {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 6px;
+  }
+  .chips-row::-webkit-scrollbar { display: none; }
+  .fchip {
+    padding: 4px 10px;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+
+  /* Grid: single column */
+  .grid-wrap { padding: 14px 12px; }
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .empty { padding: 40px 12px; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span class="header-logo">📡</span>
+  <span class="header-title">Radar Board</span>
+  <span class="header-meta" id="metaText">加载中…</span>
+</div>
+
+<div class="filter-bar">
+  <input class="search" id="searchInput" type="text" placeholder="搜索标题 / 描述…">
+  <div class="chips-row">
+    <button class="fchip active" data-f="all">全部</button>
+    <button class="fchip" data-f="fire">🔥 必看</button>
+    <button class="fchip" data-f="bolt">⚡ 值得看</button>
+    <button class="fchip" data-f="bulb">💡 备选</button>
+    <span style="width:1px;height:18px;background:var(--border-bright);margin:0 2px;flex-shrink:0"></span>
+    <button class="fchip" data-f="unread">待处理</button>
+    <button class="fchip" data-f="watching">👀 关注</button>
+    <button class="fchip" data-f="discussed">💬 讨论中</button>
+    <button class="fchip" data-f="dismissed">已忽略</button>
+  </div>
+</div>
+
+<div class="statsbar">
+  <span>共 <b id="sTot">0</b> 条</span>
+  <span>待处理 <b id="sUnread">0</b></span>
+  <span>👀 关注 <b id="sWatch">0</b></span>
+  <span>💬 讨论中 <b id="sDiscuss">0</b></span>
+  <span>已忽略 <b id="sDismiss">0</b></span>
+  <span style="margin-left:auto">显示 <b id="sShown">0</b> 条</span>
+</div>
+
+<div class="grid-wrap" id="gridWrap"></div>
+
+<script>
+// ─── Data ───────────────────────────────────────────────────────────────────
+const DATA = [
+  {id:"p000",date:"2026-05-01",round:0,grade:"💡",title:"Claude Code/OpenClaw controversy",desc:"",why:"",url:"",tags:[],extra:[]},
+  {id:"p001",date:"2026-05-01",round:0,grade:"💡",title:"Pu.sh agent",desc:"",why:"",url:"",tags:[],extra:[]},
+  {id:"p002",date:"2026-05-01",round:0,grade:"💡",title:"CUA macOS tool",desc:"",why:"",url:"",tags:[],extra:[]},
+  {id:"p003",date:"2026-05-01",round:0,grade:"💡",title:"DeepSeek Visual Primitives",desc:"",why:"",url:"",tags:[],extra:[]},
+  {id:"p004",date:"2026-05-01",round:0,grade:"💡",title:"smithery-ai/cli",desc:"",why:"",url:"",tags:[],extra:[]},
+  {id:"p005",date:"2026-05-01",round:0,grade:"💡",title:"elio file manager",desc:"",why:"",url:"",tags:[],extra:[]},
+  {id:"p006",date:"2026-05-01",round:0,grade:"💡",title:"Warp terminal open-source.",desc:"",why:"",url:"",tags:[],extra:[]},
+];
+
+// ─── State ──────────────────────────────────────────────────────────────────
+const SK = 'radar_v2';
+let S = JSON.parse(localStorage.getItem(SK)||'{}');
+// 高风险项目默认归档（首次打开自动 dismissed，手动改过的不覆盖）
+const AUTO_DISMISS = ["p082","p02e","p007","p027","p07b","p03f","p031","p04e","p083","p0ce"];
+AUTO_DISMISS.forEach(id => { if (!S[id]) S[id] = {status:'dismissed'}; });
+localStorage.setItem(SK, JSON.stringify(S));
+const getS = id => (S[id]||{status:'unread'}).status;
+const setS = (id,st) => { S[id]={status:st}; localStorage.setItem(SK,JSON.stringify(S)); };
+
+// ─── Filter ─────────────────────────────────────────────────────────────────
+let curFilter = 'all', curQ = '';
+const gradeKey = g => g==='🔥'?'fire':g==='⚡'?'bolt':'bulb';
+
+function matches(d) {
+  const st = getS(d.id);
+  const gk = gradeKey(d.grade);
+  if (curFilter==='unread' && st!=='unread') return false;
+  if (curFilter==='watching' && st!=='watching') return false;
+  if (curFilter==='discussed' && st!=='discussed') return false;
+  if (curFilter==='dismissed' && st!=='dismissed') return false;
+  if (curFilter==='fire' && gk!=='fire') return false;
+  if (curFilter==='bolt' && gk!=='bolt') return false;
+  if (curFilter==='bulb' && gk!=='bulb') return false;
+  if (curQ) {
+    const hay = (d.title+' '+d.desc+' '+(d.why||'')).toLowerCase();
+    if (!hay.includes(curQ.toLowerCase())) return false;
+  }
+  return true;
+}
+
+// ─── Render ─────────────────────────────────────────────────────────────────
+function render() {
+  updateStats();
+  const wrap = document.getElementById('gridWrap');
+  const filtered = DATA.filter(matches);
+  document.getElementById('sShown').textContent = filtered.length;
+
+  if (!filtered.length) {
+    wrap.innerHTML = '<div class="empty">没有符合条件的条目</div>';
+    return;
+  }
+
+  const byDate = {};
+  filtered.forEach(d => { (byDate[d.date]||(byDate[d.date]=[])).push(d); });
+  const dates = Object.keys(byDate).sort((a,b)=>b.localeCompare(a));
+
+  wrap.innerHTML = dates.map(date => {
+    const label = date==='2026-03-22' ? '今天 · 2026年3月22日' : '昨天 · 2026年3月21日';
+    return `<div class="date-label">${label}</div>
+      <div class="grid">${byDate[date].map(cardHTML).join('')}</div>`;
+  }).join('');
+
+  // events
+  wrap.querySelectorAll('[data-act]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const {id, act} = btn.dataset;
+      setS(id, getS(id)===act ? 'unread' : act);
+      render();
+    });
+  });
+  wrap.querySelectorAll('[data-expand]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.expand;
+      const extra = document.getElementById('extra-'+id);
+      const arrow = btn.querySelector('.expand-arrow');
+      extra.classList.toggle('open');
+      arrow.classList.toggle('open');
+      btn.querySelector('.expand-label').textContent = extra.classList.contains('open') ? '收起' : '展开详情';
+    });
+  });
+}
+
+function cardHTML(d) {
+  const st = getS(d.id);
+  const gk = gradeKey(d.grade);
+  const gradeLabel = gk==='fire'?'🔥 必看':gk==='bolt'?'⚡ 值得看':'💡 备选';
+  const stCls = st==='watching'?' st-watching':st==='discussed'?' st-discussed':st==='dismissed'?' st-dismissed':'';
+  const tags = (d.tags||[]).map(t => {
+    const cls = t.includes('⭐')?'stars':t.includes('🆕')||t.includes('求职')||t.includes('新')?'new':'source';
+    return `<span class="ctag ${cls}">${t}</span>`;
+  }).join('');
+  const extraItems = (d.extra||[]).map(e=>`<li>${e}</li>`).join('');
+  const hasExtra = d.extra && d.extra.length > 0;
+
+  return `
+<div class="card grade-${gk}${stCls}" id="card-${d.id}">
+  <div class="card-body">
+    <div style="display:flex;align-items:center;justify-content:space-between"><div class="grade-badge ${gk}">${gradeLabel}</div><span style="font-size:11px;color:#484f58;font-family:monospace">#${String(DATA.indexOf(d)+1).padStart(3,'0')}</span></div>
+    <a class="card-title" href="${d.url}" target="_blank" rel="noopener">${d.title}</a>
+    <div class="card-desc">${d.desc}</div>
+    ${d.why ? `<div class="card-why"><div class="card-why-label">为什么推给你</div>${d.why}</div>` : ''}
+    ${tags ? `<div class="card-tags">${tags}</div>` : ''}
+    ${hasExtra ? `<button class="expand-btn" data-expand="${d.id}">
+      <span class="expand-arrow">▶</span>
+      <span class="expand-label">展开详情</span>
+    </button>` : ''}
+  </div>
+  ${hasExtra ? `<div class="card-extra" id="extra-${d.id}"><ul>${extraItems}</ul></div>` : ''}
+  <div class="card-actions">
+    <button class="action-btn${st==='watching'?' on-watch':''}" data-act="watching" data-id="${d.id}">👀 关注</button>
+    <button class="action-btn${st==='discussed'?' on-discuss':''}" data-act="discussed" data-id="${d.id}">💬 讨论中</button>
+    <button class="action-btn${st==='dismissed'?' on-dismiss':''}" data-act="dismissed" data-id="${d.id}">✕ 忽略</button>
+    <a class="card-link" href="${d.url}" target="_blank" rel="noopener">打开 ↗</a>
+  </div>
+</div>`;
+}
+
+function updateStats() {
+  document.getElementById('sTot').textContent = DATA.length;
+  document.getElementById('sUnread').textContent = DATA.filter(d=>getS(d.id)==='unread').length;
+  document.getElementById('sWatch').textContent = DATA.filter(d=>getS(d.id)==='watching').length;
+  document.getElementById('sDiscuss').textContent = DATA.filter(d=>getS(d.id)==='discussed').length;
+  document.getElementById('sDismiss').textContent = DATA.filter(d=>getS(d.id)==='dismissed').length;
+  document.getElementById('metaText').textContent = '最后更新：2026-03-24 18:20';
+}
+
+document.querySelectorAll('[data-f]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-f]').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    curFilter = btn.dataset.f;
+    render();
+  });
+});
+document.getElementById('searchInput').addEventListener('input', e => {
+  curQ = e.target.value;
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
