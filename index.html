@@ -836,6 +836,74 @@ const BOARD_CONFIG = {
 // ─── Data ───────────────────────────────────────────────────────────────────
 const DATA = [
   {
+    "id": "p58829866ac",
+    "date": "2026-06-14",
+    "round": 0,
+    "grade": "🔥",
+    "title": "chopratejas/headroom (26,303⭐)",
+    "desc": "本地 context compression layer：把 tool outputs、logs、RAG chunks、files 在进 LLM 前压缩 60–95%，支持 library / proxy / MCP / agent wrap，还能做 cross-agent memory",
+    "why": "贴 OpenClaw 多 agent 的 token budget / tool output 压缩；本地优先、可逆缓存，适合先做小范围评估；Apache-2.0；[官方替代风险: 中]",
+    "url": "https://github.com/chopratejas/headroom",
+    "tags": [
+      "GitHub",
+      "26,303⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p3cf0a096f5",
+    "date": "2026-06-14",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Helvesec/rmux (1,731⭐)",
+    "desc": "Rust terminal multiplexer + typed SDK，目标是让代码/agent 稳定驱动 CLI/TUI；支持 macOS/Linux/Windows，还有 browser-shared terminal sessions",
+    "why": "比普通 tmux UI 更偏“可编程 TTY 基础设施”，和 OpenClaw process/sessions、tmux+iTerm2 工作流直接相关；Apache-2.0/MIT；[官方替代风险: 中]",
+    "url": "https://github.com/Helvesec/rmux",
+    "tags": [
+      "GitHub",
+      "1,731⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p8943c6ddcb",
+    "date": "2026-06-14",
+    "round": 0,
+    "grade": "⚡",
+    "title": "1mcp-app/agent (454⭐)",
+    "desc": "unified MCP runtime：把多个 MCP server 聚合成一个运行时，并用 `instructions → inspect → run` 降低 agent 一次性暴露的工具面",
+    "why": "贴 MCP sprawl / tool schema 上下文污染问题；适合参考 OpenClaw MCP 聚合与按需发现设计；Apache-2.0；[官方替代风险: 低-中]",
+    "url": "https://github.com/1mcp-app/agent",
+    "tags": [
+      "GitHub",
+      "454⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p2c37174ab8",
+    "date": "2026-06-14",
+    "round": 0,
+    "grade": "💡",
+    "title": "SonarSource/sonarqube-mcp-server (572⭐)",
+    "desc": "官方 SonarQube MCP Server，把代码质量/安全扫描接给 Claude Code、Antigravity 等 agent",
+    "why": "不新奇，但很实用：Agent 写完代码后接官方质量门禁，而不是只靠自评；依赖 SonarQube/Cloud 账号；[官方替代风险: 低（官方工具）]",
+    "url": "https://github.com/SonarSource/sonarqube-mcp-server",
+    "tags": [
+      "GitHub",
+      "572⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
     "id": "p3e60a65ec3",
     "date": "2026-06-13",
     "round": 0,
