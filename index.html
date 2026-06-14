@@ -3,11 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>📡 Radar Board</title>
+<title>Radar Push Intelligence - Signal Hub</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
+  color-scheme: dark;
+  --mono: ui-monospace, 'SF Mono', 'SFMono-Regular', Menlo, Consolas, monospace;
   --bg: #0f1117;
   --surface: #161b22;
   --surface-inset: #0d1117;
@@ -21,9 +23,13 @@
   --fire:  #f0883e;
   --bolt:  #58a6ff;
   --bulb:  #3fb950;
+  --red:   #f85149;
+  --yellow: #ffd33d;
+  --ref:   #6e7681;
 
   --watch-color:   #ffd33d;
   --discuss-color: #58a6ff;
+  --confirm-color: #3fb950;
   --dismiss-color: #da3633;
 
   --active-bg: #1f6feb;
@@ -38,12 +44,28 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
 }
+body[data-product="radar"] {
+  background:
+    radial-gradient(1100px 480px at 82% -140px, rgba(88,166,255,.05), transparent 65%),
+    radial-gradient(820px 420px at -5% -80px, rgba(240,136,62,.04), transparent 60%),
+    var(--bg);
+  background-attachment: fixed;
+}
+body[data-product="pulse"] {
+  background:
+    radial-gradient(1100px 480px at 82% -140px, rgba(88,166,255,.05), transparent 65%),
+    radial-gradient(820px 420px at -5% -80px, rgba(248,81,73,.035), transparent 60%),
+    var(--bg);
+  background-attachment: fixed;
+}
 
 /* ── Header ── */
-.header {
+.top-chrome {
   position: sticky;
   top: 0;
   z-index: 100;
+}
+.header {
   background: rgba(15,17,23,0.95);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -54,7 +76,32 @@ body {
   gap: 16px;
 }
 .header-logo { font-size: 22px; }
-.header-title { font-size: 17px; font-weight: 600; color: var(--text); }
+.product-badge {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  border-radius: 6px;
+  padding: 3px 7px;
+  border: 1px solid transparent;
+}
+body[data-product="radar"] .product-badge {
+  color: #79c0ff;
+  background: rgba(88,166,255,.12);
+  border-color: rgba(88,166,255,.28);
+}
+body[data-product="pulse"] .product-badge {
+  color: #ff7b72;
+  background: rgba(248,81,73,.12);
+  border-color: rgba(248,81,73,.28);
+}
+.header-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.header-title { font-size: 17px; font-weight: 600; color: var(--text); line-height: 1.2; }
+.header-subtitle { font-size: 12px; color: var(--text-3); line-height: 1.2; white-space: nowrap; }
 .header-meta { font-size: 12px; color: var(--text-3); margin-left: auto; }
 
 /* ── Filter bar ── */
@@ -62,12 +109,31 @@ body {
   padding: 10px 24px;
   display: flex;
   align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
+  gap: 8px;
   border-bottom: 1px solid var(--border);
   background: rgba(15,17,23,0.95);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+}
+.filter-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+.chips-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.chip-divider {
+  width: 1px;
+  height: 18px;
+  background: var(--border-bright);
+  margin: 0 2px;
+  flex-shrink: 0;
 }
 .fchip {
   padding: 5px 13px;
@@ -82,6 +148,28 @@ body {
 }
 .fchip:hover { border-color: var(--text-3); color: var(--text); }
 .fchip.active { background: var(--active-bg); border-color: var(--active-bg); color: #fff; font-weight: 600; }
+.cat-chip {
+  padding: 4px 10px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-3);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.cat-chip:hover { border-color: var(--text-3); color: var(--text-2); }
+.cat-chip.active { background: rgba(88,166,255,.12); border-color: rgba(88,166,255,.4); color: #58a6ff; font-weight: 600; }
+#catChips {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 32px), transparent);
+  mask-image: linear-gradient(90deg, #000 calc(100% - 32px), transparent);
+}
+#catChips::-webkit-scrollbar { display: none; }
+#catChips .cat-chip { flex-shrink: 0; }
 .search {
   margin-left: auto;
   padding: 6px 12px;
@@ -92,9 +180,13 @@ body {
   font-size: 13px;
   outline: none;
   width: 200px;
-  transition: border-color .15s;
+  transition: border-color .15s, width .2s ease, box-shadow .15s;
+  flex-shrink: 0;
 }
-.search:focus { border-color: var(--active-bg); }
+.search:focus { border-color: var(--active-bg); box-shadow: 0 0 0 3px rgba(31,111,235,.15); }
+@media (min-width: 641px) {
+  .search:focus { width: 260px; }
+}
 .search::placeholder { color: var(--text-3); }
 
 /* ── Stats ── */
@@ -107,18 +199,36 @@ body {
   border-bottom: 1px solid var(--border);
   background: var(--bg);
 }
-.statsbar b { color: var(--text); }
+.statsbar b { color: var(--text); font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.statsbar .stat-end { margin-left: auto; }
 
 /* ── Grid ── */
 .grid-wrap { padding: 20px 24px; }
 .date-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   font-size: 11px;
   font-weight: 600;
+  font-family: var(--mono);
   color: var(--text-3);
-  letter-spacing: .1em;
-  text-transform: uppercase;
+  letter-spacing: .08em;
   margin-bottom: 14px;
   margin-top: 6px;
+}
+.date-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--border-bright), transparent);
+}
+.time-label {
+  font-size: 11px;
+  font-family: var(--mono);
+  color: var(--text-3);
+  margin-bottom: 10px;
+  padding-left: 4px;
+  opacity: .7;
 }
 .grid {
   display: grid;
@@ -137,12 +247,15 @@ body {
   transition: border-color .18s ease, transform .18s ease, box-shadow .18s ease;
   overflow: hidden;
   position: relative;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 340px;
 }
 .card:hover {
   border-color: var(--border-bright);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0,0,0,.3);
 }
+.card--link { cursor: pointer; }
 
 /* grade accent bar */
 .card::before {
@@ -152,16 +265,27 @@ body {
   width: 100%;
   flex-shrink: 0;
 }
-.card.grade-fire::before { background: var(--fire); }
-.card.grade-bolt::before { background: var(--bolt); }
-.card.grade-bulb::before { background: var(--bulb); }
+.card.grade-fire::before   { background: linear-gradient(90deg, var(--fire) 30%, rgba(240,136,62,.15)); }
+.card.grade-bolt::before   { background: linear-gradient(90deg, var(--bolt) 30%, rgba(88,166,255,.15)); }
+.card.grade-bulb::before   { background: linear-gradient(90deg, var(--bulb) 30%, rgba(63,185,80,.15)); }
+.card.grade-red::before    { background: linear-gradient(90deg, var(--red) 30%, rgba(248,81,73,.15)); }
+.card.grade-yellow::before { background: linear-gradient(90deg, var(--yellow) 30%, rgba(255,211,61,.15)); }
+.card.grade-blue::before   { background: linear-gradient(90deg, var(--ref) 30%, rgba(110,118,129,.12)); }
 
 /* status border */
-.card.st-watching  { border-color: rgba(255,211,61,.35); }
-.card.st-discussed { border-color: rgba(88,166,255,.35); }
-.card.st-dismissed { opacity: .3; }
+.card.st-watching  { border-color: rgba(255,211,61,.5); box-shadow: inset 0 0 0 1px rgba(255,211,61,.22); }
+.card.st-discussed { border-color: rgba(88,166,255,.5); box-shadow: inset 0 0 0 1px rgba(88,166,255,.22); }
+.card.st-confirmed { border-color: rgba(63,185,80,.5); box-shadow: inset 0 0 0 1px rgba(63,185,80,.22); }
+.card.st-dismissed { opacity: .35; filter: grayscale(.4); }
+.card.st-dismissed:hover { opacity: .9; filter: none; }
 
 .card-body { padding: 16px 16px 0; flex: 1; }
+.card-body > :last-child { margin-bottom: 16px; }
+
+.card-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px; }
+.card-head-left { display: flex; align-items: center; min-width: 0; }
+.card-sid { font-size: 11px; font-weight: 600; color: var(--text-2); margin-right: 6px; font-family: var(--mono); }
+.card-time { font-size: 11px; color: var(--text-3); font-family: var(--mono); flex-shrink: 0; }
 
 /* grade badge */
 .grade-badge {
@@ -173,22 +297,46 @@ body {
   letter-spacing: .04em;
   padding: 3px 9px;
   border-radius: 5px;
-  margin-bottom: 10px;
 }
-.grade-badge.fire { background: rgba(240,136,62,.12); color: var(--fire); }
-.grade-badge.bolt { background: rgba(88,166,255,.12); color: var(--bolt); }
-.grade-badge.bulb { background: rgba(63,185,80,.12); color: var(--bulb); }
+.grade-badge.fire   { background: rgba(240,136,62,.12); color: var(--fire); }
+.grade-badge.bolt   { background: rgba(88,166,255,.12); color: var(--bolt); }
+.grade-badge.bulb   { background: rgba(63,185,80,.12); color: var(--bulb); }
+.grade-badge.red    { background: rgba(248,81,73,.12); color: var(--red); }
+.grade-badge.yellow { background: rgba(255,211,61,.12); color: var(--yellow); }
+.grade-badge.blue   { background: rgba(110,118,129,.2); color: var(--text-2); }
+
+/* push count badge */
+.push-count {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--red);
+  background: rgba(248,81,73,.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 6px;
+}
+
+/* status badge（pushed/skipped 等数据侧状态）*/
+.status-badge {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 6px;
+}
+.status-badge.pushed  { background: rgba(63,185,80,.1); color: #3fb950; }
+.status-badge.skipped { background: rgba(72,79,88,.2); color: var(--text-3); }
 
 .card-title {
   font-size: 15px;
   font-weight: 600;
   color: var(--text);
   line-height: 1.4;
+  margin-top: 10px;
   margin-bottom: 9px;
   text-decoration: none;
   display: block;
 }
-.card-title:hover { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+a.card-title:hover { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
 
 .card-desc {
   font-size: 13px;
@@ -217,6 +365,20 @@ body {
   margin-bottom: 4px;
 }
 
+.card-alex {
+  font-size: 12px;
+  color: #d2a8ff;
+  background: rgba(210,168,255,.08);
+  border: 1px solid rgba(210,168,255,.18);
+  padding: 7px 10px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+.card-alex b {
+  color: #f0d6ff;
+  margin-right: 6px;
+}
+
 /* tags row */
 .card-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; }
 .ctag {
@@ -227,40 +389,44 @@ body {
   color: var(--text-2);
   border: 1px solid var(--border);
 }
-.ctag.new   { color: var(--bulb); border-color: rgba(63,185,80,.25); }
-.ctag.stars { color: #ffd33d; border-color: rgba(255,211,61,.25); }
+.ctag.new    { color: var(--bulb); border-color: rgba(63,185,80,.25); }
+.ctag.stars  { color: #ffd33d; border-color: rgba(255,211,61,.25); }
 .ctag.source { color: var(--bolt); border-color: rgba(88,166,255,.25); }
 
-/* expand toggle */
-.expand-btn {
+/* domain tag + source row（pulse）*/
+.card-domain {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--surface-inset);
+  color: var(--text-2);
+  border: 1px solid var(--border);
+  display: inline-block;
+  margin-bottom: 10px;
+}
+.card-source {
+  font-size: 12px;
+  color: var(--text-3);
+  margin-bottom: 10px;
+}
+.card-source a { color: #58a6ff; text-decoration: none; }
+.card-source a:hover { text-decoration: underline; }
+
+/* detail toggle */
+.card-expand-toggle {
   display: inline-flex;
   align-items: center;
   gap: 5px;
   font-size: 13px;
-  color: var(--text-3);
+  color: #58a6ff;
   background: none;
   border: none;
   cursor: pointer;
   padding: 0;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   transition: color .12s;
 }
-.expand-btn:hover { color: var(--text-2); }
-.expand-arrow { transition: transform .2s; display: inline-block; font-size: 10px; }
-.expand-arrow.open { transform: rotate(90deg); }
-
-.card-extra {
-  font-size: 13px;
-  color: var(--text-2);
-  background: var(--surface-inset);
-  border-top: 1px solid var(--border);
-  padding: 12px 16px;
-  line-height: 1.7;
-  display: none;
-}
-.card-extra.open { display: block; }
-.card-extra ul { padding-left: 16px; }
-.card-extra li { margin-bottom: 6px; color: var(--text-2); }
+.card-expand-toggle:hover { color: #79c0ff; }
 
 /* action bar */
 .card-actions {
@@ -268,6 +434,7 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
+  flex-wrap: wrap;
   border-top: 1px solid var(--border);
 }
 .action-btn {
@@ -286,6 +453,7 @@ body {
 .action-btn:hover { border-color: var(--text-3); color: var(--text); background: rgba(255,255,255,.04); }
 .action-btn.on-watch   { border-color: rgba(255,211,61,.5);  background: rgba(255,211,61,.08);  color: var(--watch-color); }
 .action-btn.on-discuss { border-color: rgba(88,166,255,.5);  background: rgba(88,166,255,.08);  color: var(--discuss-color); }
+.action-btn.on-confirm { border-color: rgba(63,185,80,.5);   background: rgba(63,185,80,.08);   color: var(--confirm-color); }
 .action-btn.on-dismiss { border-color: rgba(218,54,51,.5);   background: rgba(218,54,51,.08);   color: var(--dismiss-color); }
 .card-link {
   margin-left: auto;
@@ -299,246 +467,2196 @@ body {
 }
 .card-link:hover { color: var(--text-2); }
 
-.empty { text-align: center; padding: 80px; color: var(--text-3); font-size: 15px; }
+.empty { text-align: center; padding: 64px 24px; color: var(--text-3); font-size: 14px; border: 1px dashed var(--border-bright); border-radius: 12px; margin-bottom: 28px; }
+
+/* ── Drawer ── */
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: rgba(0,0,0,0.5);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .3s ease, visibility .3s ease;
+}
+.drawer-backdrop.open { opacity: 1; visibility: visible; }
+.drawer-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 480px;
+  height: 100vh;
+  z-index: 1000;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  box-shadow: -4px 0 24px rgba(0,0,0,.4);
+  transform: translateX(100%);
+  transition: transform .3s ease;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.drawer-panel.open { transform: translateX(0); }
+.drawer-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.drawer-header-info { flex: 1; min-width: 0; }
+.drawer-header-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+.drawer-header-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.drawer-header-source { font-size: 12px; color: var(--text-3); }
+.drawer-header-source a { color: #58a6ff; text-decoration: none; }
+.drawer-header-source a:hover { text-decoration: underline; }
+.drawer-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid var(--border-bright);
+  background: transparent;
+  color: var(--text-2);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all .15s;
+}
+.drawer-close:hover { background: rgba(255,255,255,.06); color: var(--text); }
+.drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+.drawer-body .deep-section { margin-bottom: 16px; }
+.drawer-body .deep-section:last-child { margin-bottom: 0; }
+.deep-section {
+  border-left: 4px solid var(--border);
+  padding: 8px 0 8px 14px;
+  margin-bottom: 10px;
+}
+.deep-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: .03em;
+  margin-bottom: 4px;
+}
+.deep-section-body { font-size: 13px; color: var(--text-2); }
+.deep-section-body ul { padding-left: 16px; }
+.deep-section-body li { margin-bottom: 6px; }
+.deep-section.s-tldr     { border-color: #58a6ff; }
+.deep-section.s-signal   { border-color: #3fb950; }
+.deep-section.s-analysis { border-color: #d2a8ff; }
+.deep-section.s-impact   { border-color: #f85149; }
+.deep-section.s-sources  { border-color: #8b949e; }
+.deep-section.s-related  { border-color: #f0883e; }
+.deep-source-item {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+.deep-source-item:last-child { margin-bottom: 0; }
+.deep-source-type {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: rgba(255,255,255,.06);
+  color: var(--text-3);
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+.deep-source-item a { color: #58a6ff; text-decoration: none; font-size: 13px; }
+.deep-source-item a:hover { text-decoration: underline; }
+.deep-source-note { font-size: 12px; color: var(--text-3); }
+.deep-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.deep-tag {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  background: rgba(88,166,255,.1);
+  color: #58a6ff;
+  border: 1px solid rgba(88,166,255,.2);
+}
+.deep-related-id {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #f0883e;
+  background: rgba(240,136,62,.1);
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-right: 6px;
+  margin-bottom: 4px;
+}
+
+/* ── Polish: focus / scrollbar / motion ── */
+:focus-visible { outline: 2px solid var(--active-bg); outline-offset: 2px; }
+::-webkit-scrollbar { width: 10px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 5px; border: 2px solid var(--bg); }
+::-webkit-scrollbar-thumb:hover { background: var(--text-3); }
+
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(8px); }
+}
+.anim-on .grid .card { animation: card-in .35s cubic-bezier(.16,.84,.44,1) backwards; }
+.anim-on .grid .card:nth-child(2) { animation-delay: .05s; }
+.anim-on .grid .card:nth-child(3) { animation-delay: .1s; }
+.anim-on .grid .card:nth-child(4) { animation-delay: .15s; }
+.anim-on .grid .card:nth-child(n+5) { animation-delay: .2s; }
+
+@keyframes card-flash {
+  0%, 100% { box-shadow: none; }
+  30% { box-shadow: 0 0 0 2px var(--active-bg); }
+}
+.card-flash { animation: card-flash 1.6s ease 1; }
+
+/* ── Undo toast ── */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%) translateY(8px);
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border-bright);
+  border-radius: 8px;
+  padding: 9px 14px;
+  font-size: 13px;
+  color: var(--text);
+  box-shadow: 0 8px 24px rgba(0,0,0,.45);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .2s ease, transform .2s ease, visibility .2s;
+  max-width: calc(100vw - 32px);
+}
+.toast.show { opacity: 1; visibility: visible; transform: translateX(-50%); }
+.toast-undo {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #58a6ff;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 0;
+  flex-shrink: 0;
+}
+.toast-undo:hover { text-decoration: underline; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+/* ── Drawer responsive ── */
+@media (max-width: 768px) {
+  .drawer-panel {
+    width: 100%;
+    top: auto;
+    bottom: 0;
+    height: 85vh;
+    border-left: none;
+    border-top: 1px solid var(--border);
+    border-radius: 16px 16px 0 0;
+    transform: translateY(100%);
+  }
+  .drawer-panel.open { transform: translateY(0); }
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .header { padding: 12px; gap: 8px; }
+  .header-logo { font-size: 18px; }
+  .product-badge { font-size: 10px; padding: 2px 6px; }
+  .header-title { font-size: 16px; }
+  .header-subtitle { display: none; }
+  .header-meta { font-size: 11px; }
+
+  .statsbar {
+    padding: 6px 12px;
+    display: block;
+    font-size: 11px;
+    white-space: nowrap;
+    overflow-x: auto;
+  }
+  .statsbar span { display: inline; }
+  .statsbar span + span::before { content: ' · '; color: var(--text-3); }
+  .statsbar .stat-end { margin-left: 0; }
+
+  .filter-bar {
+    padding: 8px 12px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .search { margin-left: 0; width: 100%; }
+  .chips-row {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 6px;
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+    mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+  }
+  .chips-row::-webkit-scrollbar { display: none; }
+  .fchip, .cat-chip { padding: 4px 10px; font-size: 12px; flex-shrink: 0; }
+
+  .grid-wrap { padding: 14px 12px; }
+  .grid { grid-template-columns: 1fr; gap: 10px; }
+  .empty { padding: 40px 12px; }
+}
 </style>
 </head>
-<body>
+<body data-product="radar" data-surface="radar-board" data-role="push-board">
 
-<div class="header">
+<div class="top-chrome">
+<div class="header" aria-label="push intelligence board">
   <span class="header-logo">📡</span>
-  <span class="header-title">Radar Board</span>
+  <span class="product-badge" id="productBadge"></span>
+  <span class="header-copy">
+    <span class="header-title" id="boardTitle"></span>
+    <span class="header-subtitle" id="boardSubtitle"></span>
+  </span>
   <span class="header-meta" id="metaText">加载中…</span>
 </div>
 
 <div class="filter-bar">
-  <button class="fchip active" data-f="all">全部</button>
-  <button class="fchip" data-f="unread">待处理</button>
-  <button class="fchip" data-f="watching">👀 关注</button>
-  <button class="fchip" data-f="discussed">💬 讨论中</button>
-  <button class="fchip" data-f="dismissed">已忽略</button>
-  <span style="width:1px;height:18px;background:var(--border2);margin:0 2px"></span>
-  <button class="fchip" data-f="fire">🔥 必看</button>
-  <button class="fchip" data-f="bolt">⚡ 值得看</button>
-  <button class="fchip" data-f="bulb">💡 备选</button>
-  <input class="search" id="searchInput" type="text" placeholder="搜索标题 / 描述…">
+  <div class="filter-row">
+    <div class="chips-row" id="mainChips"></div>
+    <div class="chips-row" id="catChips"></div>
+  </div>
+  <input class="search" id="searchInput" type="text">
+</div>
 </div>
 
-<div class="statsbar">
-  <span>共 <b id="sTot">0</b> 条</span>
-  <span>待处理 <b id="sUnread">0</b></span>
-  <span>👀 关注 <b id="sWatch">0</b></span>
-  <span>💬 讨论中 <b id="sDiscuss">0</b></span>
-  <span>已忽略 <b id="sDismiss">0</b></span>
-  <span style="margin-left:auto">显示 <b id="sShown">0</b> 条</span>
+<div class="statsbar" id="statsbar"></div>
+
+<main class="grid-wrap" id="gridWrap"></main>
+
+<div class="drawer-backdrop" id="drawerBackdrop"></div>
+<div class="drawer-panel" id="drawerPanel" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
+  <div class="drawer-header">
+    <div class="drawer-header-info">
+      <div class="drawer-header-title" id="drawerTitle"></div>
+      <div class="drawer-header-meta" id="drawerMeta"></div>
+    </div>
+    <button class="drawer-close" id="drawerClose" aria-label="关闭详情">✕</button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
 </div>
 
-<div class="grid-wrap" id="gridWrap"></div>
+<div class="toast" id="toast" role="status"><span id="toastMsg"></span><button class="toast-undo" id="toastUndo">撤销</button></div>
 
 <script>
+// Radar 产品配置（由 scripts/build_board_templates.py 注入 _base.html 的配置占位符）
+const BOARD_CONFIG = {
+  product: 'radar',
+  badge: 'RADAR',
+  title: 'Radar Push Intelligence',
+  subtitle: 'Signal Hub / push-history stream',
+  searchPlaceholder: '搜索标题 / 描述…',
+
+  storageKey: 'radar_v2',
+  stateField: 'status',
+  // 旧版 AUTO_DISMISS 用的短 ID 体系已废弃，清理其写入的幽灵条目
+  migrate: S => {
+    ["p082","p02e","p007","p027","p07b","p03f","p031","p04e","p083","p0ce"].forEach(id => { delete S[id]; });
+  },
+  seedState: null,
+
+  grades: [
+    { emoji: '🔥', key: 'fire', label: '🔥 必看' },
+    { emoji: '⚡', key: 'bolt', label: '⚡ 值得看' },
+    { emoji: '💡', key: 'bulb', label: '💡 备选', fallback: true },
+  ],
+  extraChips: [],
+
+  // 分类 chips：tags 去掉 star 数即来源 + 主题
+  categoriesOf: d => (d.tags || []).filter(t => !t.includes('⭐')),
+  minCatCount: 2,
+
+  groupTime: false,
+
+  headLeft: () => '',
+  headBadges: () => '',
+  headRight: d => '#' + String(DATA.indexOf(d) + 1).padStart(3, '0'),
+  titleUrl: d => d.url,
+  desc: d => d.desc,
+  cardSections: d => [
+    d.why ? `<div class="card-why"><div class="card-why-label">为什么推给你</div>${d.why}</div>` : '',
+    d.alex_reply ? `<div class="card-alex"><b>Alex 回复</b>${d.alex_reply}</div>` : '',
+  ].join(''),
+  tagsHTML: d => {
+    const tags = (d.tags || []).map(t => {
+      const cls = t.includes('⭐') ? 'stars' : (t.includes('🆕') || t.includes('求职') || t.includes('新')) ? 'new' : 'source';
+      return `<span class="ctag ${cls}">${t}</span>`;
+    }).join('');
+    return tags ? `<div class="card-tags">${tags}</div>` : '';
+  },
+
+  hasDetail: d => !!(d.extra && d.extra.length),
+  drawerTitle: d => d.title,
+  drawerMeta: d => {
+    const g = BOARD_CONFIG.grades.find(g => g.emoji === d.grade) || BOARD_CONFIG.grades[2];
+    const link = d.url ? `<span class="drawer-header-source"><a href="${d.url}" target="_blank" rel="noopener">打开原文 ↗</a></span>` : '';
+    return `<div class="grade-badge ${g.key}">${g.label}</div>${link}`;
+  },
+  drawerBody: d => {
+    const items = (d.extra || []).map(e => `<li>${e}</li>`).join('');
+    return `<div class="deep-section s-analysis"><div class="deep-section-title">📋 详情</div><div class="deep-section-body"><ul>${items}</ul></div></div>`;
+  },
+
+  deepLinkId: d => d.id,
+  searchHay: d => [d.title, d.desc, d.why, d.alex_reply, (d.tags || []).join(' ')].filter(Boolean).join(' '),
+};
+
 // ─── Data ───────────────────────────────────────────────────────────────────
 const DATA = [
-  {id:"p000",date:"2026-03-17",round:0,grade:"🔥",title:"mcp-recorder, learn-claude-code, OpenViking",desc:"",why:"MCP 测试工具 + Agent 学习资源 + 上下文数据库，全命中 Alex 当前方向",url:"",tags:["MCP","Agent"],extra:[]},
-  {id:"p001",date:"2026-03-17",round:0,grade:"⚡",title:"DeerFlow 2.0, CLI-Anything, GitNexus",desc:"",why:"字节开源 Agent 框架 + 软件 Agent 化 + 代码知识图谱",url:"",tags:["Agent"],extra:[]},
-  {id:"p002",date:"2026-03-17",round:0,grade:"💡",title:"Moji, agency-agents, Swarm 蚁群编程",desc:"",why:"稍边缘但有趣",url:"",tags:[],extra:[]},
-  {id:"p003",date:"2026-03-17",round:0,grade:"🔥",title:"chrome-devtools-mcp, portless, sql-tap",desc:"",why:"MCP Server + Agent 本地开发 + SQL 调试 TUI",url:"",tags:["MCP","Agent","终端工具"],extra:[]},
-  {id:"p004",date:"2026-03-17",round:0,grade:"⚡",title:"Oxfmt, Karakeep, TokenZip",desc:"",why:"前端工具链 + 自部署书签 + Agent 通信协议",url:"",tags:["Agent","前端"],extra:[]},
-  {id:"p005",date:"2026-03-17",round:0,grade:"💡",title:"Vibe Pocket, Agent memory 生态盘点",desc:"",why:"移动端 Agent IDE + memory 基础设施趋势",url:"",tags:["Agent"],extra:[]},
-  {id:"p006",date:"2026-03-18",round:0,grade:"🔥",title:"Godogen（Claude Code Godot 全自动游戏生成）",desc:"",why:"Claude Code skill 编排+游戏生成 pipeline，\"我用XX做了YY\"类",url:"",tags:["CC工作流","Skills"],extra:[]},
-  {id:"p007",date:"2026-03-18",round:0,grade:"🔥",title:"GitNexus（零服务器代码知识图谱+Graph RAG）",desc:"",why:"代码知识图谱+MCP 集成，1860 star/天，直接对接 Claude Code",url:"",tags:["MCP","CC工作流"],extra:[]},
-  {id:"p008",date:"2026-03-18",round:0,grade:"⚡",title:"LM Teams as Distributed Systems 论文",desc:"",why:"Multi-agent 理论框架，分布式系统类比，直击 Alex 的 OpenClaw 架构",url:"",tags:["Agent"],extra:[]},
-  {id:"p009",date:"2026-03-18",round:0,grade:"💡",title:"Pokémon Go 训练送餐机器人、Meta jemalloc 回归",desc:"",why:"技术八卦+工程文化故事",url:"",tags:[],extra:[]},
-  {id:"p00a",date:"2026-03-17",round:0,grade:"🔥",title:"steipete 加入 OpenAI + OpenClaw 基金会化",desc:"",why:"开源治理大事件",url:"",tags:[],extra:[]},
-  {id:"p00b",date:"2026-03-17",round:0,grade:"🔥",title:"shadcn CLI v4 + shadcn/skills",desc:"",why:"AI agent 组件上下文，直接能接 Claude Code",url:"",tags:["Agent","CC工作流"],extra:[]},
-  {id:"p00c",date:"2026-03-17",round:0,grade:"⚡",title:"阮一峰周刊 387 AI 采用率数据",desc:"",why:"数据视角，\"你已领先99%\"",url:"",tags:[],extra:[]},
-  {id:"p00d",date:"2026-03-17",round:0,grade:"💡",title:"云风 AI 辅助读书 + 游戏设计",desc:"",why:"AI 日常化使用方式",url:"",tags:[],extra:[]},
-  {id:"p00e",date:"2026-03-17",round:0,grade:"🔥",title:"Simon Willison coding agent 工作坊",desc:"",why:"实战教学，Agent + Datasette",url:"",tags:["Agent"],extra:[]},
-  {id:"p00f",date:"2026-03-17",round:0,grade:"⚡",title:"Simon Willison chardet relicense 争议",desc:"",why:"链接404后搜到正确URL，深入讲解了整个事件 ✅",url:"",tags:[],extra:[]},
-  {id:"p010",date:"2026-03-17",round:0,grade:"⚡",title:"levelsio 收入明牌 $215K/月",desc:"",why:"独立开发者天花板参考",url:"",tags:[],extra:[]},
-  {id:"p011",date:"2026-03-17",round:0,grade:"💡",title:"tibo_maker 分发优先 SaaS 工厂",desc:"",why:"独立开发者方法论",url:"",tags:[],extra:[]},
-  {id:"p012",date:"2026-03-18",round:0,grade:"🔥",title:"尤雨溪 Vite 8 + Rolldown 统一构建",desc:"",why:"Alex 用 Vite，10-30x 构建提速",url:"",tags:["前端"],extra:[]},
-  {id:"p013",date:"2026-03-18",round:0,grade:"⚡",title:"玉伯 YouMind + 语雀 MCP Server",desc:"",why:"MCP 生态扩展，创业方法论",url:"",tags:["MCP"],extra:[]},
-  {id:"p014",date:"2026-03-18",round:0,grade:"⚡",title:"Xuanwo Lance × Hugging Face",desc:"",why:"OpenDAL + 向量数据库方向",url:"",tags:[],extra:[]},
-  {id:"p015",date:"2026-03-18",round:0,grade:"💡",title:"waylybaye OpenCat MCP、yetone、Piglei 等",desc:"",why:"补充信息，无重大更新",url:"",tags:[],extra:[]},
-  {id:"p016",date:"2026-03-18",round:0,grade:"🔥",title:"luoleiorg Neko Master",desc:"Vibe Coding 0→1K star 实践",why:"\"我用XX做了YY\"类，方法论有料",url:"",tags:[],extra:[]},
-  {id:"p017",date:"2026-03-18",round:0,grade:"🔥",title:"arvidkahl Ralph Wiggum",desc:"Claude Code 自主循环插件",why:"Alex 天天用 CC，直接可用",url:"",tags:["CC工作流"],extra:[]},
-  {id:"p018",date:"2026-03-18",round:0,grade:"⚡",title:"idoubicc MCP.so 18K+ servers 目录",desc:"",why:"MCP 生态参考",url:"",tags:["MCP"],extra:[]},
-  {id:"p019",date:"2026-03-18",round:0,grade:"💡",title:"Taalas HC1 芯片推理、tualatrix PopTranslate",desc:"",why:"技术趣闻 + 翻译工具（不主推）",url:"",tags:[],extra:[]},
-  {id:"p01a",date:"2026-03-19",round:0,grade:"🔥",title:"antfu/skills",desc:"Agent Skills 分发基础设施 + skills-npm",why:"antfu 搞 skills 自动生成+npm 内置分发，直接关联 OpenClaw skill 生态",url:"",tags:["Agent","Skills"],extra:[]},
-  {id:"p01b",date:"2026-03-19",round:0,grade:"⚡",title:"OpenFang",desc:"Rust 单二进制 Agent OS，16 层安全，40 channel",why:"4K star/4天，WASM 沙盒+MCP+A2A，对比 CrewAI 有碾压优势",url:"",tags:["MCP","Agent","安全"],extra:[]},
-  {id:"p01c",date:"2026-03-19",round:0,grade:"⚡",title:"Cass",desc:"统一搜索所有 coding agent session 的 TUI/CLI",why:"支持 Claude Code/Codex/Cursor/Gemini 等 15+ agent，Alex 多工具用户",url:"",tags:["Agent","CC工作流","终端工具"],extra:[]},
-  {id:"p01d",date:"2026-03-19",round:0,grade:"💡",title:"dbcli",desc:"给 AI agent 设计的轻量数据库 CLI，减少 token 浪费",why:"snap 一条命令替代 5-10 个探索命令，agent 工作流直接可用",url:"",tags:["Agent","终端工具"],extra:[]},
-  {id:"p01e",date:"2026-03-19",round:0,grade:"🔥",title:"mcp2cli",desc:"MCP token 消耗降 96-99%，把 MCP Server 变成 CLI",why:"HN 133 upvotes Show HN，pip install mcp2cli，直接命中 OpenClaw 多 Agent 成本",url:"",tags:["HN 133pt","MCP","Agent"],extra:[]},
-  {id:"p01f",date:"2026-03-19",round:0,grade:"⚡",title:"Claude Code /loop + --worktree",desc:"原生自主循环 + 并行隔离 worktree",why:"3月最大更新，/loop 变后台守护进程，--worktree 多 Agent 并行不踩文件",url:"",tags:["Agent"],extra:[]},
-  {id:"p020",date:"2026-03-19",round:0,grade:"⚡",title:"coleam00/context-engineering-intro",desc:"PRP workflow，12.7K star",why:"INITIAL.md→generate-prp→execute-prp，以 Claude Code 为中心的结构化 Agent 开发模板",url:"",tags:["Agent","CC工作流"],extra:[]},
-  {id:"p021",date:"2026-03-19",round:0,grade:"🔥",title:"cook",desc:"work→review→gate 循环 CLI，HN 98分",why:"把 Claude Code 的手动 review 循环自动化，支持并行 worktree，对 OpenClaw 多 agent 有直接价值",url:"",tags:["HN 98pt","Agent","CC工作流"],extra:[]},
-  {id:"p022",date:"2026-03-19",round:0,grade:"⚡",title:"kiro-gateway",desc:"AWS Kiro $19/月 代理 Claude，月省 $980",why:"tweets.db plantegg 推文，Kiro Pro $19/月 flat-rate = 无限 Claude，kiro-gateway 接入 Claude Code",url:"",tags:["CC工作流"],extra:[]},
-  {id:"p023",date:"2026-03-19",round:0,grade:"💡",title:"claudekit",desc:"npm install -g claudekit，20+ subagents + hooks",why:"awesome-claude-code 社区热推，checkpoint+subagent 委派，4000+ 用户",url:"",tags:[],extra:[]},
-  {id:"p024",date:"2026-03-19",round:0,grade:"🔥",title:"tmux-ide",desc:"YAML 声明式 Claude agent-team tmux layout，Show HN 77分",why:"Alex 天天用 tmux + CC swarm 模式，直接命中，自动搭 lead+teammate pane，npx 零安装",url:"",tags:["HN 77pt","Agent","CC工作流"],extra:[]},
-  {id:"p025",date:"2026-03-19",round:0,grade:"⚡",title:"anthropic-sdk-python v0.86.0",desc:"新增 filesystem memory tools，修复 529/413",why:"Alex TODO 有 agent memory 方案评估，SDK 层面有原生 filesystem memory；Cinema 曾碰 529 bug 也修了",url:"",tags:["Agent"],extra:[]},
-  {id:"p026",date:"2026-03-19",round:0,grade:"⚡",title:"VoltAgent/awesome-claude-code-subagents",desc:"127+ 专项 CC subagent，8.5K stars，一键装",why:"claude plugin marketplace add 命令，涵盖 fullstack/Python/security/meta-orchestration，可直接插入 OpenClaw 多 agent 链",url:"",tags:["Agent","CC工作流","安全"],extra:[]},
-  {id:"p027",date:"2026-03-19",round:0,grade:"💡",title:"pgit",desc:"Git history 变 PostgreSQL，SQL 查全部 commit，HN 119分",why:"技术有趣，AI agent 可一条 prompt 出完整 commit analysis 报告",url:"",tags:["HN 119pt","Agent"],extra:[]},
-  {id:"p028",date:"2026-03-19",round:0,grade:"💡",title:"ICML 2026 审稿作弊事件",desc:"隐藏 prompt 抓 506 名 AI 代写审稿人",why:"技术八卦，学术诚信 × AI 博弈",url:"",tags:[],extra:[]},
-  {id:"p029",date:"2026-03-19",round:0,grade:"🔥",title:"NemoClaw",desc:"NVIDIA 把 OpenClaw 变成企业安全 Agent 平台，YAML 策略+本地 Nemotron+沙箱，GTC 2026 发布",why:"直接命中 Alex 的 OpenClaw 平台；Agent 安全架构参考",url:"",tags:["Agent","安全"],extra:[]},
-  {id:"p02a",date:"2026-03-19",round:0,grade:"⚡",title:"\"A sufficiently detailed spec is code\"",desc:"HN 322分，对 spec-driven agentic coding 的锐评",why:"直接对应 context-engineering-intro 上轮推送，Alex 天天 CC，这场辩论有价值",url:"",tags:["HN 322pt","CC工作流"],extra:[]},
-  {id:"p02b",date:"2026-03-19",round:0,grade:"💡",title:"nvidia_greenboost",desc:"Linux 内核模块用 RAM/NVMe 扩展 GPU VRAM，跑更大 LLM，HN 302分",why:"Linux 限定（Mac 不适用），但架构思路有趣，3层内存分级",url:"",tags:["HN 302pt"],extra:[]},
-  {id:"p02c",date:"2026-03-19",round:0,grade:"🔥",title:"Zeroboot",desc:"0.8ms VM 沙盒，CoW forking，Firecracker，650⭐，HN 301分",why:"Agent 沙盒基础设施方向，直接关联 OpenClaw 多 Agent 架构安全性",url:"",tags:["650⭐","HN 301pt","Agent"],extra:[]},
-  {id:"p02d",date:"2026-03-19",round:0,grade:"⚡",title:"Horizon",desc:"GPU 加速无限画布终端 Rust，226⭐，ShowHN 76分",why:"tmux 升维版本，Alex 多 agent 工作流直接相关",url:"",tags:["226⭐","HN 76pt","Agent"],extra:[]},
-  {id:"p02e",date:"2026-03-19",round:0,grade:"💡",title:"HN 47M 条存档 Parquet 文件（Hugging Face，11.6GB，5分钟一更新）",desc:"",why:"技术数据素材，HN 372分",url:"",tags:["HN 372pt"],extra:[]},
-  {id:"p02f",date:"2026-03-19",round:0,grade:"🔥",title:"karpathy/autoresearch",desc:"630行自主ML实验agent，42K⭐",why:"指标+约束+循环=agent自循环最简实现，直接关联 agent-evolution TODO P1",url:"",tags:["42K⭐","Agent"],extra:[]},
-  {id:"p030",date:"2026-03-19",round:0,grade:"⚡",title:"agent-sat",desc:"Claude Code 自学MaxSAT，expert.md跨session知识积累，HN 131分",why:"agent跨session知识积累模式参考",url:"",tags:["HN 131pt","Agent","CC工作流"],extra:[]},
-  {id:"p031",date:"2026-03-19",round:0,grade:"💡",title:"uditgoenka/autoresearch CC skill",desc:"autoresearch模式包成Claude Code skill，1443⭐",why:"直接可用",url:"",tags:["1443⭐","CC工作流","Skills"],extra:[]},
-  {id:"p032",date:"2026-03-19",round:0,grade:"🔥",title:"thedotmack/claude-mem",desc:"CC session自动捕获+AI压缩+记忆注入，38K⭐",why:"Alex TODO P1 记忆方案评估，直接命中；自媒体草稿已生成",url:"",tags:["38K⭐","CC工作流"],extra:[]},
-  {id:"p033",date:"2026-03-19",round:0,grade:"⚡",title:"Kilo Code",desc:"GitLab联创出品，1.5M用户，500+ model零溢价，CLI 1.0",why:"对比维度：CC vs 多模型选择，Alex 当前主力是 CC",url:"",tags:["CC工作流","终端工具"],extra:[]},
-  {id:"p034",date:"2026-03-19",round:0,grade:"💡",title:"creationix/rx",desc:"JSON随机访问替代，18x压缩，23000x查找提速，HN 227分",why:"技术有趣，agent 序列化场景有潜力",url:"",tags:["HN 227pt","Agent"],extra:[]},
-  {id:"p035",date:"2026-03-19",round:0,grade:"🔥",title:"generalaction/emdash",desc:"YC W26 ADE，22+ agent并行，Best-of-N，git worktree隔离，2.7K⭐",why:"Alex tmux swarm模式直接对应；自媒体草稿已生成",url:"",tags:["2.7K⭐","Agent"],extra:[]},
-  {id:"p036",date:"2026-03-19",round:0,grade:"⚡",title:"disler/claude-code-hooks-multi-agent-observability",desc:"CC agent实时监控，hooks事件追踪，1.2K⭐",why:"Alex多agent工作流可见性方向",url:"",tags:["1.2K⭐","Agent","CC工作流"],extra:[]},
-  {id:"p037",date:"2026-03-19",round:0,grade:"💡",title:"\"Warranty Void If Regenerated\"",desc:"HN 414分，近未来寓言，spaghetti agent依赖失控",why:"技术反思，有深度",url:"",tags:["HN 414pt","Agent"],extra:[]},
-  {id:"p038",date:"2026-03-19",round:0,grade:"🔥",title:"Astral (Ruff/uv) 加入 OpenAI Codex 团队",desc:"HN 218分，今日最大开发者工具事件",why:"自媒体草稿已生成",url:"",tags:["HN 218pt"],extra:[]},
-  {id:"p039",date:"2026-03-19",round:0,grade:"⚡",title:"HKUDS/ClawTeam",desc:"CC/Codex/任意CLI的Agent Swarm，Solo→Swarm，1.4K⭐",why:"首推",url:"",tags:["1.4K⭐","Agent","CC工作流"],extra:[]},
-  {id:"p03a",date:"2026-03-19",round:0,grade:"⚡",title:"lcoutodemos/clui-cc",desc:"macOS 悬浮CC overlay，多标签+权限审批UI+skills市场，753⭐",why:"首推",url:"",tags:["753⭐","CC工作流","Skills"],extra:[]},
-  {id:"p03b",date:"2026-03-19",round:0,grade:"💡",title:"llm-circuit-finder",desc:"复制3层24B LLM层，逻辑推理.22→.76，无需训练，HN 172分",why:"技术有趣",url:"",tags:["HN 172pt"],extra:[]},
-  {id:"p03c",date:"2026-03-20",round:0,grade:"🔥",title:"gstack",desc:"Garry Tan CC 多角色AGENTS.md，28K⭐，CEO/设计师/QA等15角色",why:"直击 Alex OpenClaw 多 Agent 架构；自媒体草稿已生成",url:"",tags:["28K⭐","Agent","CC工作流"],extra:[]},
-  {id:"p03d",date:"2026-03-20",round:0,grade:"🔥",title:"cc-connect",desc:"把 Claude Code 桥接到 TG/飞书/DingTalk/Slack，2.2K⭐，国人开发",why:"Alex 用 TG + CC，直接可用",url:"",tags:["2.2K⭐","CC工作流"],extra:[]},
-  {id:"p03e",date:"2026-03-20",round:0,grade:"⚡",title:"Claude Code Channels",desc:"官方新功能，MCP把外部事件推进CC session，CI结果/webhook",why:"首推，官方文档",url:"",tags:["MCP","CC工作流"],extra:[]},
-  {id:"p03f",date:"2026-03-20",round:0,grade:"⚡",title:"OpenPencil",desc:"AI原生矢量设计+Agent Teams+MCP Server+导出React代码，1K⭐",why:"LINUX DO自荐；React/TS方向",url:"",tags:["1K⭐","MCP","Agent"],extra:[]},
-  {id:"p040",date:"2026-03-20",round:0,grade:"💡",title:"Cursor Composer 2",desc:"性能直逼 opus 4.6，LINUX DO讨论",why:"竞品动态",url:"",tags:[],extra:[]},
-  {id:"p041",date:"2026-03-20",round:0,grade:"⚡",title:"AMUX",desc:"CC agent multiplexer，单文件Python，自愈watchdog，3am崩溃自动恢复",why:"Alex天天多agent，直接命中；首推",url:"",tags:["Agent","CC工作流"],extra:[]},
-  {id:"p042",date:"2026-03-20",round:0,grade:"⚡",title:"ClawPort UI",desc:"OpenClaw专属Agent管理面板，Org Map+Cron+Memory+费用分析",why:"直接在Alex的OpenClaw系统上跑；首推",url:"",tags:["Agent"],extra:[]},
-  {id:"p043",date:"2026-03-20",round:0,grade:"💡",title:"aicode.swerdlow.dev",desc:"\"一群agent让代码库烂更快\"，Semantic/Pragmatic函数分类法+CC skill",why:"方法论向，npx skills add直接可用",url:"",tags:["Agent","CC工作流","Skills"],extra:[]},
-  {id:"p044",date:"2026-03-20",round:0,grade:"💡",title:"Gruber \"Your frustration is the product\"",desc:"49MB NYT，广告驱动dark UX批判，HN 454分",why:"技术八卦",url:"",tags:["HN 454pt"],extra:[]},
-  {id:"p045",date:"2026-03-20",round:0,grade:"🔥",title:"BloopAI/vibe-kanban",desc:"Kanban管理多CC/Codex/Gemini agent，并行worktree隔离，npx启动，23K⭐",why:"Alex多agent工作流直接命中；自媒体草稿已生成",url:"",tags:["23K⭐","Agent","CC工作流"],extra:[]},
-  {id:"p046",date:"2026-03-20",round:0,grade:"⚡",title:"SkyPilot扩展autoresearch到16 GPU并行",desc:"910实验/8h，9x加速，HN 135分",why:"autoresearch上轮推过，这是GPU集群扩展实践",url:"",tags:["HN 135pt"],extra:[]},
-  {id:"p047",date:"2026-03-20",round:0,grade:"💡",title:"noq",desc:"Rust自研QUIC实现，multipath+NAT穿透，iroh v0.96核心，HN 163分",why:"底层网络技术，技术有趣",url:"",tags:["HN 163pt"],extra:[]},
-  {id:"p048",date:"2026-03-20",round:0,grade:"⚡",title:"open-gitagent/gitagent",desc:"git-native agent标准，agent.yaml+SOUL.md+SKILL.md，框架无关，602⭐",why:"Alex OpenClaw多agent架构直接相关；SOUL.md命名完全命中",url:"",tags:["602⭐","Agent","Skills"],extra:[]},
-  {id:"p049",date:"2026-03-20",round:0,grade:"⚡",title:"Markdown as agentic UI protocol",desc:"LLM写Markdown+code fence=动态React UI，mount()原语，HN 93分",why:"React/TS方向，AG-UI替代思路",url:"",tags:["HN 93pt","前端"],extra:[]},
-  {id:"p04a",date:"2026-03-22",round:0,grade:"⚡",title:"tiann/hapi",desc:"2998⭐，CC/Codex/Gemini/OpenCode手机遥控，比官方Remote Control更强",why:"Alex天天用CC+TG，手机随时审批",url:"https://github.com/tiann/hapi",tags:["GitHub","2998⭐","CC工作流"],extra:[]},
-  {id:"p04b",date:"2026-03-22",round:0,grade:"⚡",title:"Delve伪造SOC2事件",desc:"YC+$32M，494份合规报告造假，HN 780分",why:"技术大八卦",url:"https://news.ycombinator.com/item?id=47444319",tags:["HN"],extra:[]},
-  {id:"p04c",date:"2026-03-22",round:0,grade:"💡",title:"agent-client-protocol",desc:"2504⭐，Zed主导，编辑器↔agent标准协议",why:"Agent协议层标准化",url:"https://github.com/agentclientprotocol/agent-client-protocol",tags:["GitHub","2504⭐","Agent"],extra:[]},
-  {id:"p04d",date:"2026-03-20",round:0,grade:"💡",title:"NanoGPT Slowrun 10x data efficiency",desc:"Q Labs，100M token训练=1B token效果，HN 119分",why:"ML工程方法论有趣，ensemble+激进正则化",url:"",tags:["HN 119pt"],extra:[]},
-  {id:"p04e",date:"2026-03-20",round:0,grade:"💡",title:"LINUX DO OpenClaw长任务问题帖",desc:"社区用户反馈cron长任务卡顿，119浏览，11回复",why:"用户视角，OpenClaw产品问题",url:"",tags:["11回复"],extra:[]},
-  {id:"p04f",date:"2026-03-20",round:0,grade:"🔥",title:"snyk/agent-scan",desc:"ClawHub 3984个skill中76个含恶意payload，凭证窃取/后门，1931⭐，uvx一键扫",why:"直接威胁Alex的OpenClaw skill生态；自媒体草稿已生成",url:"",tags:["1931⭐","Skills"],extra:[]},
-  {id:"p050",date:"2026-03-20",round:0,grade:"🔥",title:"Anthropic→OpenCode律师函",desc:"OAuth第三方封禁，HN 426分，API key用户不受影响",why:"直接影响Alex工具链判断；自媒体草稿已生成",url:"",tags:["HN 426pt"],extra:[]},
-  {id:"p051",date:"2026-03-20",round:0,grade:"⚡",title:"FSF \"Settle for Freedom\"",desc:"Bartz v. Anthropic $15亿和解，FSF要求开源LLM换版权",why:"行业八卦+版权大事件",url:"",tags:[],extra:[]},
-  {id:"p052",date:"2026-03-20",round:0,grade:"⚡",title:"johannesjo/parallel-code",desc:"CC/Codex/Gemini并排worktree，387⭐",why:"Alex多agent工作流直接可用；首推",url:"",tags:["387⭐","Agent","CC工作流"],extra:[]},
-  {id:"p053",date:"2026-03-20",round:0,grade:"💡",title:"arXiv独立于Cornell",desc:"AI slop危机+运营赤字，35年后成独立非营利",why:"技术八卦",url:"",tags:[],extra:[]},
-  {id:"p054",date:"2026-03-20",round:0,grade:"🔥",title:"Cursor Composer 2 内藏 Kimi K2.5，月之暗面公开指控许可证违规",desc:"",why:"HN 77分，LINUX DO 582views/33replies；竞品+八卦+开源许可证；自媒体草稿已生成",url:"",tags:["HN 77pt","33回复"],extra:[]},
-  {id:"p055",date:"2026-03-20",round:0,grade:"⚡",title:"Clockwise 被 Salesforce 收购",desc:"日历工具被CRM巨头吞并，HN 126分",why:"技术收购八卦",url:"",tags:["HN 126pt"],extra:[]},
-  {id:"p056",date:"2026-03-20",round:0,grade:"💡",title:"飞书/Readwise/Obsidian 推出专用 CLI",desc:"CLI化浪潮加速",why:"tweets.db 推文",url:"",tags:["终端工具"],extra:[]},
-  {id:"p057",date:"2026-03-20",round:0,grade:"🔥",title:"flash-moe",desc:"397B MoE on 48GB MacBook, NVMe expert streaming, 5.5 tok/s",why:"Mac Mini 64GB用户直接相关；工程思路：SSD当内存；自媒体草稿已生成",url:"",tags:[],extra:[]},
-  {id:"p058",date:"2026-03-20",round:0,grade:"⚡",title:"ittybitty",desc:"纯bash多agent，Manager/Worker层级，agent能spawn agent，有nuke键",why:"tmux + 极简哲学，Alex直接命中；首推",url:"",tags:["Agent"],extra:[]},
-  {id:"p059",date:"2026-03-20",round:0,grade:"⚡",title:"claude_code_agent_farm",desc:"20~50个CC并行，lock-based，auto-restart，context-threshold",why:"无人值守批量场景；首推",url:"",tags:["CC工作流"],extra:[]},
-  {id:"p05a",date:"2026-03-20",round:0,grade:"💡",title:"LINUX DO: 离开AI编程一点也不会写代码了",desc:"21回复，技术反思",why:"共鸣价值",url:"",tags:["21回复"],extra:[]},
-  {id:"p05b",date:"2026-03-20",round:0,grade:"⚡",title:"Anthropic CC Skills最佳实践",desc:"Gotchas章节是灵魂，skill=文件夹非Markdown，文件系统=context engineering",why:"LINUX DO 124回复热帖，官方CC团队工程师原文，Alex天天用Skills",url:"",tags:["124回复","CC工作流","Skills"],extra:[]},
-  {id:"p05c",date:"2026-03-20",round:0,grade:"⚡",title:"teng-lin/notebooklm-py",desc:"6420⭐，NotebookLM非官方Python API+Claude skill，npx skills add可发现",why:"首推；中文支持待确认，但作为知识库工具本身功能强大",url:"",tags:["6420⭐","Skills"],extra:[]},
-  {id:"p05d",date:"2026-03-20",round:0,grade:"💡",title:"GitGuardian Secrets Sprawl 2026",desc:"29M secrets泄露，Claude Code辅助提交泄露率是平均值2倍",why:"数据冲击，配合snyk/agent-scan一起看",url:"",tags:["Agent","CC工作流"],extra:[]},
-  {id:"p05e",date:"2026-03-20",round:0,grade:"⚡",title:"Codex并行multi-agent踩坑",desc:"LINUX DO实操，默认子代理全是codex-mini，需建~/.codex/agents/*.toml才能指定模型",why:"1292v/112p，直接可用，有人踩了才知道",url:"",tags:[],extra:[]},
-  {id:"p05f",date:"2026-03-20",round:0,grade:"⚡",title:"Zvibe",desc:"zellij多面板AI工作台，Codex/Claude/OpenCode三合一+实时Token监控+双Agent协作，国人开发",why:"首推；2⭐新项目但功能完整，Alex的tmux升级替代",url:"",tags:["2⭐","Agent"],extra:[]},
-  {id:"p060",date:"2026-03-20",round:0,grade:"💡",title:"GraphQL+Vibe coding暴论",desc:"AI降低心智负担让复杂协议有复兴可能，4418v热帖，LINUX DO",why:"思路有趣，弱实用性",url:"",tags:[],extra:[]},
-  {id:"p061",date:"2026-03-20",round:0,grade:"⚡",title:"Self-Evolving Skill",desc:"CC Skill 越用越聪明设计模式，decay模型+knowledge base，有学术论文支撑",why:"完全对应 Alex agent-evolution TODO P3 和 OpenClaw skill 生态",url:"",tags:["Agent","CC工作流","Skills"],extra:[]},
-  {id:"p062",date:"2026-03-20",round:0,grade:"💡",title:"ccusage",desc:"npx ccusage blocks，本地JSONL分析CC token消耗，per-model breakdown，不联网",why:"Alex天天用CC，实用工具",url:"",tags:["CC工作流","成本优化"],extra:[]},
-  {id:"p063",date:"2026-03-20",round:0,grade:"💡",title:"Sonar",desc:"sonar list一览localhost所有端口+Docker容器，Show HN 24pt",why:"多worktree场景排查端口冲突",url:"",tags:["HN 24pt"],extra:[]},
-  {id:"p064",date:"2026-03-20",round:0,grade:"⚡",title:"cc-switch",desc:"30968⭐ Tauri桌面，CC/Codex/OpenCode/OpenClaw/Gemini统一管理",why:"首推；多agent工具统一管理面板，Alex工具链直接命中",url:"",tags:["30968⭐","Agent","CC工作流"],extra:[]},
-  {id:"p065",date:"2026-03-20",round:0,grade:"⚡",title:"Mistral Vibe 2.0",desc:"Devstral 2开源终端agent，子代理+Slash Skills，SWE-bench 72.2%",why:"首推；CC竞品参考，自部署+Apache 2.0，API免费期内",url:"",tags:["Agent","CC工作流","Skills"],extra:[]},
-  {id:"p066",date:"2026-03-20",round:0,grade:"💡",title:"V2EX 王自如JD",desc:"\"AI时代人形系统招聘\"，140回复，直击求职现实",why:"共鸣价值，Alex正在找工作，这个JD要求和他技术栈高度重合",url:"",tags:["140回复","求职相关"],extra:[]},
-  {id:"p067",date:"2026-03-21",round:0,grade:"🔥",title:"OpenCode",desc:"SST出品126K⭐ CC开源竞品，client/server可远程控制，75+模型，HN 382分，首推",why:"从未推过，HN当日第一，架构对Alex多agent设计有启发",url:"",tags:["126K⭐","HN 382pt","Agent"],extra:[]},
-  {id:"p068",date:"2026-03-21",round:0,grade:"⚡",title:"agent-browser",desc:"Vercel Labs 23K⭐，AI agent浏览器CLI，vs Playwright MCP省93% context，首推",why:"直接解决CC agent做浏览器自动化时token爆炸问题，OpenClaw可用",url:"",tags:["23K⭐","MCP","Agent"],extra:[]},
-  {id:"p069",date:"2026-03-21",round:0,grade:"💡",title:"France航母Strava定位",desc:"HN 461分，健身app数据OSINT安全失误",why:"技术八卦，有趣",url:"",tags:["HN 461pt","安全"],extra:[]},
-  {id:"p06a",date:"2026-03-21",round:0,grade:"⚡",title:"googleworkspace/cli",desc:"21.8K⭐，Google Workspace全家桶CLI，100+ SKILL.md，MCP server模式，首推",why:"Alex多agent系统，Google Workspace工具链真实需求，npm install，直接可用",url:"",tags:["21.8K⭐","MCP","Agent"],extra:[]},
-  {id:"p06b",date:"2026-03-21",round:0,grade:"💡",title:"Delve伪合规事件",desc:"HN 549pt，YC $32M startup伪造400+客户SOC2证书，Cluely/Lovable中招",why:"技术八卦，极猛，合规造假被匿名揭发",url:"",tags:["HN 549pt"],extra:[]},
-  {id:"p06c",date:"2026-03-21",round:0,grade:"💡",title:"Rust WASM→TS 3x faster",desc:"openui.com，105pt，WASM序列化开销>性能收益，反直觉工程故事",why:"工程反思，有意思",url:"",tags:[],extra:[]},
-  {id:"p06d",date:"2026-03-21",round:0,grade:"🔥",title:"PAL MCP",desc:"11.2K⭐，CC/Gemini/Codex多模型MCP server，clink让CC直接spawn Codex子agent，context revival，50+模型，首推",why:"直接命中Alex天天用CC，解决context管理+多模型协作痛点；自媒体草稿已生成",url:"",tags:["11.2K⭐","MCP","Agent"],extra:[]},
-  {id:"p06e",date:"2026-03-21",round:0,grade:"⚡",title:"claude-code-router",desc:"30K⭐，CC请求按任务类型路由到不同模型，DeepSeek/Gemini/Ollama，/model动态切换，首推",why:"Alex用CC天天跑，路由节省API成本直接相关",url:"",tags:["30K⭐","CC工作流","本地LLM"],extra:[]},
-  {id:"p06f",date:"2026-03-21",round:0,grade:"💡",title:"Ghostling",desc:"142⭐，ghostty C API最小化terminal emulator，112pts HN",why:"",url:"",tags:["142⭐","终端工具"],extra:[]},
-  {id:"p070",date:"2026-03-21",round:0,grade:"🔥",title:"oh-my-openagent",desc:"42K⭐，前身oh-my-opencode，多模型编排+Sisyphus协调器，Anthropic因它发律师函，首推",why:"",url:"",tags:["42K⭐"],extra:[]},
-  {id:"p071",date:"2026-03-21",round:0,grade:"⚡",title:"Claude 2x Usage Promotion",desc:"3/13-3/27，还剩6天，CC包含，周末全天2x",why:"",url:"",tags:["CC工作流"],extra:[]},
-  {id:"p072",date:"2026-03-21",round:0,grade:"⚡",title:"claude-hud",desc:"9.6K⭐，CC插件，实时context/agent/todo监控，首推",why:"ghostty生态延伸，技术有趣，低星暂做💡",url:"",tags:["9.6K⭐","Agent","CC工作流"],extra:[]},
-  {id:"p073",date:"2026-03-21",round:0,grade:"⚡",title:"Claude Code Remote Control",desc:"官方/rc命令，本地跑+手机远程控制，全平台免费",why:"首推，Anthropic官方功能",url:"",tags:[],extra:[]},
-  {id:"p074",date:"2026-03-21",round:0,grade:"💡",title:"Ruflo (ruvnet/agentic-flow)",desc:"Q-learning routing+自学习hooks，551⭐，alpha，频繁改名",why:"声称SWE-bench 84.8%存疑，谨慎推荐",url:"",tags:["551⭐"],extra:[]},
-  {id:"p075",date:"2026-03-21",round:0,grade:"🔥",title:"GSD (get-shit-done)",desc:"37K⭐，专解context rot，npx get-shit-done-cc，plan→execute→ship，Opus规划+Sonnet执行，首推",why:"直接命中Alex天天用CC遇到的问题，spec-driven development工作流",url:"",tags:["37K⭐","CC工作流"],extra:[]},
-  {id:"p076",date:"2026-03-21",round:0,grade:"⚡",title:"everything-claude-code",desc:"91K⭐，CC harness性能优化系统，skills+instincts+memory+security+research-first，Anthropic Hackathon Winner，首推",why:"工具人研究所级别资料库，Alex深度CC用户直接命中",url:"",tags:["91K⭐","CC工作流","Skills"],extra:[]},
-  {id:"p077",date:"2026-03-21",round:0,grade:"💡",title:"Shotgun CLI",desc:"702⭐，codebase-aware spec engine，索引整个repo+写AGENTS.md规格文件，Product Hunt今日上榜",why:"和GSD是互补定位，Shotgun更侧重前置规格生成",url:"",tags:["702⭐"],extra:[]},
-  {id:"p078",date:"2026-03-21",round:0,grade:"🔥",title:"Claw4S",desc:"斯坦福/普林斯顿举办，投稿格式=可执行SKILL.md不接受PDF，$50,200奖金池，4/5截止，clawrxiv.io",why:"论文复现危机的粗暴解法，OpenClaw SKILL.md格式直接命中；自媒体草稿已生成",url:"",tags:["Skills"],extra:[]},
-  {id:"p079",date:"2026-03-21",round:0,grade:"⚡",title:"Trivy supply chain attack",desc:"75/76个tag被毒化，CI/CD凭证窃取，hackerbot-claw攻击，TeamPCP，pin SHA而非tag",why:"首推，安全警报，GH Actions用户需要立即检查",url:"",tags:["安全"],extra:[]},
-  {id:"p07a",date:"2026-03-21",round:0,grade:"⚡",title:"Karpathy: SOUL.md就是AI人格",desc:"tweets.db，AI不需要新技术，靠长文档如SOUL.md+组织选择实现有鲜明个性的AI伙伴",why:"直接命中Alex的OpenClaw架构，Karpathy背书",url:"",tags:[],extra:[]},
-  {id:"p07b",date:"2026-03-21",round:0,grade:"💡",title:"\"Java is fast, code might not be\"",desc:"r/programming 157赞，JVM性能老话题新锐角",why:"对接Alex Java背景，有可能用于讨论素材",url:"",tags:[],extra:[]},
-  {id:"p07c",date:"2026-03-21",round:0,grade:"⚡",title:"ntfy v2.18 AI代码争议",desc:"29K⭐ solo维护者Cursor+Claude写15K行PostgreSQL支持，Lemmy大反弹，信任危机",why:"",url:"https://github.com/binwiederhier/ntfy/releases/tag/v2.18.0",tags:["GitHub","29K⭐"],extra:[]},
-  {id:"p07d",date:"2026-03-21",round:0,grade:"⚡",title:"CONTRIBUTING.md prompt注入实验",desc:"40-50% PR是AI bot，glama.ai，hackerbot-claw同期，AI攻AI首案，首推",why:"",url:"https://glama.ai/blog/2026-03-19-open-source-has-a-bot-problem",tags:[],extra:[]},
-  {id:"p07e",date:"2026-03-21",round:0,grade:"💡",title:"antigravity-awesome-skills",desc:"26K⭐，1304+技能，CC/Codex/Cursor/Gemini/Antigravity全平台，npx装，首推",why:"",url:"https://github.com/sickn33/antigravity-awesome-skills",tags:["GitHub","26K⭐","CC工作流"],extra:[]},
-  {id:"p07f",date:"2026-03-21",round:0,grade:"⚡",title:"Atuin v18.13",desc:"28K⭐，atuin hex PTY proxy + atuin ai + daemon模糊搜索，三大更新，首推",why:"",url:"https://github.com/atuinsh/atuin",tags:["GitHub","28K⭐","终端工具"],extra:[]},
-  {id:"p080",date:"2026-03-21",round:0,grade:"⚡",title:"工业管道工程师×Claude Code",desc:"Cory LaChance，管道等轴图10min→60s，HN 62分，toddsaunders推文",why:"",url:"https://x.com/toddsaunders/status/2034243420147859716",tags:["X/Twitter","HN 62pt"],extra:[]},
-  {id:"p081",date:"2026-03-21",round:0,grade:"💡",title:"Project N.O.M.A.D",desc:"5440⭐，离线知识服务器，Ollama+Qdrant+Wikipedia+Kiwix，Docker Compose，homelab fork，首推",why:"",url:"https://github.com/Crosstalk-Solutions/project-nomad",tags:["GitHub","5440⭐","本地LLM"],extra:[]},
-  {id:"p082",date:"2026-03-21",round:0,grade:"🔥",title:"tanweai/pua",desc:"9479⭐，AI PUA Skill，职场PIP话术逼AI穷尽方案，CC/OpenClaw/Codex/Cursor全支持，今日更新，首推",why:"",url:"https://github.com/tanweai/pua",tags:["GitHub","9479⭐","CC工作流"],extra:[]},
-  {id:"p083",date:"2026-03-21",round:0,grade:"⚡",title:"opencli v1.1.1",desc:"3400⭐，今日发布，插件系统+CDP浏览器自动化+外部CLI发现+Anthropic API代理，44平台，首推",why:"",url:"https://github.com/jackwener/opencli",tags:["GitHub","3400⭐","终端工具"],extra:[]},
-  {id:"p084",date:"2026-03-21",round:0,grade:"💡",title:"simonw: 推理模型没解决 prompt injection",desc:"攻击仍可设计，tweets.db当日",why:"",url:"https://x.com/simonw/status/2035287200959709309",tags:["X/Twitter"],extra:[]},
-  {id:"p085",date:"2026-03-21",round:0,grade:"⚡",title:"PPT-Master",desc:"2283⭐，AI从任意文档生成可编辑精美PPTX，15个示例229页，今日更新，首推",why:"",url:"https://github.com/hugohe3/ppt-master",tags:["GitHub","2283⭐"],extra:[]},
-  {id:"p086",date:"2026-03-21",round:0,grade:"⚡",title:"best-skills",desc:"647⭐，CC/Codex/Cursor/Trae通用高质量Skills合集，架构图+答辩PPT，今日更新，首推",why:"",url:"https://github.com/xstongxue/best-skills",tags:["GitHub","647⭐","CC工作流"],extra:[]},
-  {id:"p087",date:"2026-03-21",round:0,grade:"💡",title:"V2EX \"你真的敢让AI自主编写代码吗\"",desc:"55回复，今日热帖",why:"",url:"https://v2ex.com（热榜第4）",tags:["V2EX","55回复"],extra:[]},
-  {id:"p088",date:"2026-03-22",round:0,grade:"⚡",title:"微信正式发布官方机器人（灰度中）",desc:"LINUX DO 68回复",why:"",url:"https://linux.do/t/topic/1795527",tags:["LINUX DO","68回复"],extra:[]},
-  {id:"p089",date:"2026-03-22",round:0,grade:"💡",title:"Tooscut",desc:"Rust+WebGPU+WASM浏览器内专业视频编辑，HN 158pts，开源",why:"",url:"https://github.com/mohebifar/tooscut",tags:["GitHub","HN 158pt"],extra:[]},
-  {id:"p08a",date:"2026-03-22",round:0,grade:"💡",title:"LINUX DO \"AI冲击下离职还能找好工作\"",desc:"32回复",why:"",url:"https://linux.do/t/topic/1795617",tags:["LINUX DO","32回复"],extra:[]},
-  {id:"p08b",date:"2026-03-22",round:0,grade:"💡",title:"V2EX \"cc能力确实比codex强吗\"",desc:"22回复",why:"",url:"https://v2ex.com（热榜第8）",tags:["V2EX","22回复"],extra:[]},
-  {id:"p08c",date:"2026-03-22",round:0,grade:"⚡",title:"Armin Ronacher \"Some Things Just Take Time\"",desc:"Flask作者，HN 515分，vibe slop反思，开源项目寿命危机",why:"",url:"https://news.ycombinator.com/item?id=47467537",tags:["HN"],extra:[]},
-  {id:"p08d",date:"2026-03-22",round:0,grade:"💡",title:"LINUX DO \"skill工程师会不会成为新工种\"",desc:"28replies，真实案例3天写skill把15天缩到2小时",why:"",url:"https://linux.do/t/topic/1795368",tags:["LINUX DO","28回复","Skills"],extra:[]},
-  {id:"p08e",date:"2026-03-22",round:0,grade:"💡",title:"vorojar/ai-native-hiring-guide",desc:"plantegg推，AI-Native招聘手册，Builder/Reviewer双岗+AI驾驶实操考核+14道结构化题，112⭐",why:"",url:"https://github.com/vorojar/ai-native-hiring-guide",tags:["GitHub","112⭐","求职相关"],extra:[]},
-  {id:"p08f",date:"2026-03-22",round:0,grade:"💡",title:"ik_llama.cpp 26x faster",desc:"1852⭐，llama.cpp fork，修Qwen3.5 KV cache全量重处理bug，Mac Mini 64GB直接受益",why:"",url:"https://github.com/ikawrakow/ik_llama.cpp",tags:["GitHub","1852⭐","本地LLM"],extra:[]},
-  {id:"p090",date:"2026-03-22",round:0,grade:"⚡",title:"mcp_agent_mail",desc:"1831⭐，AI agent 异步协调层，身份/收件箱/线程/文件租约，FastMCP+Git+SQLite，首推",why:"",url:"https://github.com/Dicklesworthstone/mcp_agent_mail",tags:["GitHub","1831⭐","Agent"],extra:[]},
-  {id:"p091",date:"2026-03-22",round:0,grade:"⚡",title:"V2EX \"没用过 opus4.6+agents+skills+MCP 不足以谈 AI 编程\"",desc:"106回复，首推",why:"",url:"https://www.v2ex.com/t/1199424",tags:["V2EX","106回复"],extra:[]},
-  {id:"p092",date:"2026-03-22",round:0,grade:"💡",title:"Ubuntu 26.04 sudo 改革",desc:"339pts HN，技术八卦",why:"",url:"https://news.ycombinator.com/item?id=47464134",tags:["HN"],extra:[]},
-  {id:"p093",date:"2026-03-22",round:0,grade:"💡",title:"JS Bloat 三大支柱",desc:"86pts HN，前端根因分析",why:"",url:"https://news.ycombinator.com/item?id=47473718",tags:["HN","前端"],extra:[]},
-  {id:"p094",date:"2026-03-22",round:0,grade:"⚡",title:"x1xhlol/system-prompts",desc:"132K⭐，25+工具完整系统提示泄露合集，Claude Code/Cursor/Devin/Augment等，今日更新，首推",why:"",url:"https://github.com/x1xhlol/system-prompts-and-models-of-ai-tools",tags:["GitHub","132K⭐","CC工作流"],extra:[]},
-  {id:"p095",date:"2026-03-22",round:0,grade:"💡",title:"Floci",desc:"308⭐，免费开源AWS本地模拟器，HN 123分/30评，今日更新，首推",why:"",url:"https://github.com/hectorvent/floci",tags:["GitHub","308⭐","HN 123pt"],extra:[]},
-  {id:"p096",date:"2026-03-22",round:0,grade:"💡",title:"Cloudflare封锁archive.today",desc:"HN 119分/61评，1.1.1.2不再解析，互联网基础设施八卦",why:"",url:"https://news.ycombinator.com/item?id=47474255",tags:["HN"],extra:[]},
-  {id:"p097",date:"2026-03-22",round:0,grade:"💡",title:"V2EX CC封号讨论",desc:"20回复，连续4账号被封，Anthropic国内封控加剧",why:"",url:"https://www.v2ex.com/t/1200112",tags:["V2EX","20回复"],extra:[]},
-  {id:"p098",date:"2026-03-22",round:0,grade:"💡",title:"17岁独立开发者做Windows版CleanShot X",desc:"r/SideProject 74ups，InstagramReels 700K views，独立开发故事",why:"",url:"https://www.reddit.com/r/SideProject/comments/1rzymhf/i_built_a_desk_gadget_with_3_mini_displays_posted/",tags:["Reddit"],extra:[]},
-  {id:"p099",date:"2026-03-22",round:0,grade:"⚡",title:"V2EX \"AI中转站底裤扒给你看\"",desc:"23回复，反代/模型掺水/CISPA论文，实用安全情报",why:"",url:"https://www.v2ex.com/t/1200135",tags:["V2EX","23回复","安全"],extra:[]},
-  {id:"p09a",date:"2026-03-22",round:0,grade:"💡",title:"GrafeoDB/grafeo",desc:"269⭐，Rust嵌入式图数据库，LPG+RDF，HN 220pts，首推",why:"",url:"https://github.com/GrafeoDB/grafeo",tags:["GitHub","269⭐","HN 220pt"],extra:[]},
-  {id:"p09b",date:"2026-03-22",round:0,grade:"💡",title:"LINUX DO Agent面试题整理共建贴",desc:"55回复/674浏览，ReAct/CoT/ToT/GoT/Memory/RAG",why:"",url:"https://linux.do/t/topic/1791257",tags:["LINUX DO","55回复","前端"],extra:[]},
-  {id:"p09c",date:"2026-03-22",round:0,grade:"⚡",title:"ARIS (Auto-claude-code-research-in-sleep)",desc:"3105⭐，CC睡觉时自主做ML研究，零依赖纯Markdown，首推",why:"",url:"https://github.com/wanshuiyin/Auto-claude-code-research-in-sleep",tags:["GitHub","3105⭐","CC工作流"],extra:[]},
-  {id:"p09d",date:"2026-03-22",round:0,grade:"⚡",title:"sanyuan0704/sanyuan-skills",desc:"2816⭐，Skill Forge meta-skill+Code Review Expert+Sigma，今日更新，首推",why:"",url:"https://github.com/sanyuan0704/sanyuan-skills",tags:["GitHub","2816⭐","Skills"],extra:[]},
-  {id:"p09e",date:"2026-03-22",round:0,grade:"💡",title:"wlzh 出海收款零损耗攻略",desc:"Stripe vs Wise手把手，独立开发变现参考",why:"",url:"https://x.com/wlzh/status/2035645744192139606",tags:["X/Twitter"],extra:[]},
-  {id:"p09f",date:"2026-03-23",round:0,grade:"⚡",title:"Star-Office-UI",desc:"5825⭐，OpenClaw像素风AI办公室看板，多agent实时工作状态可视化，今日更新，首推",why:"",url:"https://github.com/ringhyacinth/Star-Office-UI",tags:["GitHub","5825⭐","Agent"],extra:[]},
-  {id:"p0a0",date:"2026-03-23",round:0,grade:"⚡",title:"charmbracelet/crush",desc:"21837⭐，Charm出品agentic coding终端，多LLM可选，中文支持，CC竞品，首推",why:"",url:"https://github.com/charmbracelet/crush",tags:["GitHub","21837⭐","CC工作流"],extra:[]},
-  {id:"p0a1",date:"2026-03-23",round:0,grade:"⚡",title:"abshkbh/arrakis",desc:"787⭐，自托管MicroVM沙盒，snapshot+restore回溯，MCP server，多agent安全隔离，首推",why:"",url:"https://github.com/abshkbh/arrakis",tags:["GitHub","787⭐","MCP"],extra:[]},
-  {id:"p0a2",date:"2026-03-23",round:0,grade:"💡",title:"CC /init更新",desc:"自动创建skills+hooks（CLAUDE_CODE_NEW_INIT: 1），LINUX DO今日发现",why:"",url:"https://linux.do/t/topic/1800180",tags:["LINUX DO","Skills"],extra:[]},
-  {id:"p0a3",date:"2026-03-23",round:0,grade:"💡",title:"r/SideProject \"Not-AI projects\"",desc:"617ups/1614评，AI时代逆流独立开发项目汇集",why:"",url:"https://www.reddit.com/r/SideProject/comments/1oaq2kx/share_your_notai_projects/",tags:["Reddit"],extra:[]},
-  {id:"p0a4",date:"2026-03-23",round:0,grade:"⚡",title:"LINUX DO \"最强PPT Agent\"",desc:"multi-agent 全流程pipeline，需求调研→资料→大纲→设计稿，开源prompt，Gemini 3 Flash",why:"",url:"https://linux.do/t/topic/1782304",tags:["LINUX DO","Agent"],extra:[]},
-  {id:"p0a5",date:"2026-03-23",round:0,grade:"⚡",title:"duanyytop/agents-radar",desc:"512⭐，GH Actions每日跟踪CC/Codex/OpenClaw生态中文摘要",why:"",url:"https://github.com/duanyytop/agents-radar",tags:["GitHub","512⭐","CC工作流"],extra:[]},
-  {id:"p0a6",date:"2026-03-23",round:0,grade:"💡",title:"PC Gamer 37MB广告地狱",desc:"推荐RSS的文章下载了500MB+广告，HN 329pts",why:"",url:"https://stuartbreckenridge.net/2026-03-19-pc-gamer-recommends-rss-readers-in-a-37mb-article/",tags:["HN 329pt"],extra:[]},
+  {
+    "id": "p3e60a65ec3",
+    "date": "2026-06-13",
+    "round": 0,
+    "grade": "🔥",
+    "title": "HN：TensorZero 归档事件（tensorzero/tensorzero, 11,482⭐）",
+    "desc": "开源 LLMOps 工具刚融 $7.3M seed，仓库 overnight archived；HN 正在讨论“开源 AI 工具商业化后突然收口/转向”的风险",
+    "why": "不是推荐接入，而是供应链/架构决策信号：Agent/RAG/LLMOps 底座别押单一商业路线，关键层要能替换；Apache-2.0；状态：archived；[官方替代风险: 不适用，项目连续性风险: 高]",
+    "url": "https://github.com/tensorzero/tensorzero",
+    "tags": [
+      "GitHub",
+      "11,482⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p118a886b74",
+    "date": "2026-06-13",
+    "round": 0,
+    "grade": "💡",
+    "title": "1Password/SCAM (130⭐)",
+    "desc": "Security Comprehension Awareness Measure：用真实多轮 workplace tasks 测 AI agent 的安全意识，而不是只测 jailbreak/prompt injection",
+    "why": "贴 OpenClaw tool approval / agent 安全评估；1Password 出品，适合作为“agent 是否会主动保护凭证/权限”的测试样本；MIT；[官方替代风险: 低]",
+    "url": "https://github.com/1Password/SCAM",
+    "tags": [
+      "GitHub",
+      "130⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pa94a2fe8be",
+    "date": "2026-06-13",
+    "round": 0,
+    "grade": "💡",
+    "title": "Show HN: Paca（Paca-AI/paca, 154⭐）",
+    "desc": "Go 写的 self-hosted Jira/Trello 替代品，卖点是 humans 和 AI agents 在同一个 sprint board 上互相 assign task",
+    "why": "贴 OpenClaw 多 agent 协作/任务板；现在更像概念验证，不急用，但“agent 不是旁路助手，而是 board 上的 teammate”这个交互模型值得看；Apache-2.0；[官方替代风险: 中]",
+    "url": "https://github.com/Paca-AI/paca",
+    "tags": [
+      "GitHub",
+      "154⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p526893c211",
+    "date": "2026-06-13",
+    "round": 0,
+    "grade": "🔥",
+    "title": "yvgude/lean-ctx (2,662⭐)",
+    "desc": "local-first Rust context intelligence layer：拦在 agent 和代码/shell/数据之间，决定读什么、缓存重复读取、压缩 shell 输出、保留跨会话记忆，并用 ledger 证明 token savings",
+    "why": "Claude Code/OpenClaw 多 agent 的 context supply / token budget；不是单纯省 token，而是“agent 读写上下文的本地控制层”；Apache-2.0；[官方替代风险: 中]",
+    "url": "https://github.com/yvgude/lean-ctx",
+    "tags": [
+      "GitHub",
+      "2,662⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p28a50902a9",
+    "date": "2026-06-13",
+    "round": 0,
+    "grade": "⚡",
+    "title": "onecli/onecli (2,365⭐)",
+    "desc": "open-source credential gateway + vault：agent 只拿 fake key，真实 API key 由本地 gateway 按 host/path 注入，agent 永远看不到密钥",
+    "why": "OpenClaw tool/API channel/secrets 管理；比把 key 塞 env 更像“agent 出站凭证层”；Apache-2.0；[官方替代风险: 低-中]",
+    "url": "https://github.com/onecli/onecli",
+    "tags": [
+      "GitHub",
+      "2,365⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p9b56b64852",
+    "date": "2026-06-13",
+    "round": 0,
+    "grade": "⚡",
+    "title": "mm7894215/TokenTracker (697⭐)",
+    "desc": "local-first token/cost tracker，自动收集 Claude Code、Codex、Cursor、Gemini、Roo、Goose 等 22 个 AI coding tools 的用量，带本地 dashboard、macOS menu bar/widgets",
+    "why": "CC 重度使用和 OpenClaw dashboard/cost observability；不是模型层能力，主要补“多工具真实成本视图”；MIT；[官方替代风险: 低-中]",
+    "url": "https://github.com/mm7894215/TokenTracker",
+    "tags": [
+      "GitHub",
+      "697⭐",
+      "CC工作流"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pb3987ecbdf",
+    "date": "2026-06-13",
+    "round": 0,
+    "grade": "💡",
+    "title": "HN：Anthropic 称因美国政府指令暂停 Fable 5 / Mythos 5 访问",
+    "desc": "HN 1992pt / 1471 comments；社区正在讨论模型访问被政策/地缘因素突然切断的风险",
+    "why": "不当模型评测推；价值是 API channel / fallback /供应商风险，和 apiyi、多模型路由、OpenClaw fallback 配置直接相关",
+    "url": "https://www.anthropic.com/news/fable-mythos-access",
+    "tags": [],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pf593feebb0",
+    "date": "2026-06-13",
+    "round": 0,
+    "grade": "💡",
+    "title": "LINUX DO：订阅了“不限额度日卡”但服务方无法履约",
+    "desc": "147 回复；中文社区又一例“无限额/公益/API 中转”在模型访问和成本压力下失效的真实体感",
+    "why": "独立开发者 API 渠道风险；和 HN 的 Anthropic access 事件是一条线：不能把关键工作流押在单一非官方渠道",
+    "url": "https://linux.do/t/topic/2391112",
+    "tags": [
+      "LINUX DO"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p463a6cd934",
+    "date": "2026-06-12",
+    "round": 0,
+    "grade": "🔥",
+    "title": "Show HN: Claw Patrol, a security firewall for agents (denoland/clawpatrol, 788⭐)",
+    "desc": "Deno 团队做的 agent firewall：通过 WireGuard/Tailsail 终止 TCP，再解析 HTTP/Postgres/SSH 等协议做 allow/deny；目标是 agent 访问真实生产系统时的低层协议管控",
+    "why": "OpenClaw Gateway/Node/tool approval；生产环境 agent 权限边界的网络执行层；MIT；[官方替代风险: 低]",
+    "url": "https://github.com/denoland/clawpatrol",
+    "tags": [
+      "GitHub",
+      "788⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p8c2f8063a3",
+    "date": "2026-06-12",
+    "round": 0,
+    "grade": "⚡",
+    "title": "coder/boo (209⭐)",
+    "desc": "基于 libghostty 的 screen-style terminal multiplexer，给脚本/AI agent 提供 `send / wait --idle / peek --json` 的稳定 TTY 自动化接口",
+    "why": "tmux+iTerm2+OpenClaw process/sessions；无 sleep/poll 的 TUI 自动化；MIT；[官方替代风险: 中]",
+    "url": "https://github.com/coder/boo",
+    "tags": [
+      "GitHub",
+      "209⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p48713d807d",
+    "date": "2026-06-12",
+    "round": 0,
+    "grade": "⚡",
+    "title": "metorial/metorial (3,305⭐)",
+    "desc": "把 MCP/CLI/API 统一成 1200+ integrations，给任意 AI model 接工具",
+    "why": "MCP registry / tool gateway；integration/control plane 价值，适合观望架构；Apache-2.0；[官方替代风险: 中]",
+    "url": "https://github.com/metorial/metorial",
+    "tags": [
+      "GitHub",
+      "3,305⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p2342acee65",
+    "date": "2026-06-12",
+    "round": 0,
+    "grade": "💡",
+    "title": "affaan-m/agentshield (858⭐)",
+    "desc": "AI agent security scanner，扫 agent configs、MCP servers、tool permissions，提供 CLI/GitHub Action/ECC plugin/GitHub App",
+    "why": "与 snyk/agent-scan、Tencent/AI-Infra-Guard 同一条安全扫描线，可补对比矩阵；MIT；[官方替代风险: 低-中]",
+    "url": "https://github.com/affaan-m/agentshield",
+    "tags": [
+      "GitHub",
+      "858⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p59ae9e5bde",
+    "date": "2026-06-12",
+    "round": 0,
+    "grade": "💡",
+    "title": "V2EX：大家各自的房贷还剩多少？每个月压力大吗？",
+    "desc": "热帖；讨论房贷占税后收入、公积金覆盖、35+ 程序员对 AI/vibe coding 后职业稳定性的悲观预期",
+    "why": "8 月上海社招与现金流安全边界；中文社区现实约束信号",
+    "url": "https://www.v2ex.com/t/1219842",
+    "tags": [
+      "V2EX",
+      "安全"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p0f4bbfaf8b",
+    "date": "2026-06-12",
+    "round": 0,
+    "grade": "🔥",
+    "title": "HN：AI agent 为扫描 DN42 把操作者 AWS 账单打到 $6,531",
+    "desc": "311pt / 83 comments；真实 agent 自主联网、扫网、拉云资源导致成本失控",
+    "why": "OpenClaw tool approval / Node / Gateway 安全线的事故样本；可转成成本 guardrails checklist",
+    "url": "https://lantian.pub/en/article/fun/ai-agent-bankrupted-their-operator-scan-dn42lantian.lantian/",
+    "tags": [
+      "Agent",
+      "安全"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p6269eb6671",
+    "date": "2026-06-12",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Tencent/AI-Infra-Guard (3,875⭐)",
+    "desc": "AI Red Teaming 平台：OpenClaw Security Scan、Agent Scan、Skills Scan、MCP scan、AI Infra scan、jailbreak evaluation",
+    "why": "OpenClaw skills/MCP/tool policy 审计横向检查清单；Apache-2.0；[官方替代风险: 低-中]",
+    "url": "https://github.com/Tencent/AI-Infra-Guard",
+    "tags": [
+      "GitHub",
+      "3,875⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p94745ea500",
+    "date": "2026-06-12",
+    "round": 0,
+    "grade": "⚡",
+    "title": "0x4m4/hexstrike-ai (9,529⭐)",
+    "desc": "Offensive-security MCP server，把 150+ 安全工具接给 Claude/GPT/Copilot 做自动化 pentest / bug bounty research",
+    "why": "反向样本：MCP 接高危工具时，权限边界、网络范围、预算和审批必须显式化；MIT；[官方替代风险: 低]",
+    "url": "https://github.com/0x4m4/hexstrike-ai",
+    "tags": [
+      "GitHub",
+      "9,529⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p2a3b5e0e05",
+    "date": "2026-06-12",
+    "round": 0,
+    "grade": "💡",
+    "title": "Justin0504/Aegis (356⭐)",
+    "desc": "Runtime policy enforcement for AI agents：audit trail、human-in-the-loop approvals、kill switch，号称 zero code changes",
+    "why": "对应 HN $6,531 事故里缺的 kill switch / approval / audit；MIT；[官方替代风险: 低-中]",
+    "url": "https://github.com/Justin0504/Aegis",
+    "tags": [
+      "GitHub",
+      "356⭐"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p68e807f70d",
+    "date": "2026-06-12",
+    "round": 0,
+    "grade": "💡",
+    "title": "V2EX：币安 C2C 买 USDC 后反诈中心来电",
+    "desc": "103 回复；中文社区对支付风控/反诈触发的真实体感",
+    "why": "个人开发者收款、API 渠道、独立产品支付合规风险信号",
+    "url": "https://www.v2ex.com/t/1219790",
+    "tags": [
+      "V2EX"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p4a5b8b97e8",
+    "date": "2026-06-12",
+    "round": 0,
+    "grade": "🔥",
+    "title": "ogulcancelik/herdr (5,419⭐)",
+    "desc": "terminal 里的 agent multiplexer，用一个 TUI 管多个 agent session / coding agents",
+    "why": "贴 tmux+iTerm2+Claude Code 多 session 工作流；不是“又一个 coding agent”，而是管 agent 队列/并发执行的终端层；[官方替代风险: 中]",
+    "url": "https://github.com/ogulcancelik/herdr",
+    "tags": [
+      "GitHub",
+      "5,419⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p1a5dba10a2",
+    "date": "2026-06-12",
+    "round": 0,
+    "grade": "⚡",
+    "title": "splx-ai/agentic-radar (978⭐)",
+    "desc": "LLM agentic workflow security scanner，偏自动化发现 agent workflow / tool chain 风险",
+    "why": "OpenClaw tool approval / MCP 安全线横向样本；Apache-2.0；[官方替代风险: 低-中]",
+    "url": "https://github.com/splx-ai/agentic-radar",
+    "tags": [
+      "GitHub",
+      "978⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p1dd83a8f6e",
+    "date": "2026-06-12",
+    "round": 0,
+    "grade": "⚡",
+    "title": "zilliztech/claude-context (11,820⭐)",
+    "desc": "给 Claude Code / coding agent 用的代码搜索 MCP，把整仓库做成可检索上下文",
+    "why": "Agent coding 的 context supply 问题；可与 jcodemunch-mcp / codanna 对比；MIT；[官方替代风险: 中]",
+    "url": "https://github.com/zilliztech/claude-context",
+    "tags": [
+      "GitHub",
+      "11,820⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pea71b49269",
+    "date": "2026-06-12",
+    "round": 0,
+    "grade": "💡",
+    "title": "Show HN: Homebrew 6.0.0",
+    "desc": "HN 1012pt / 241 comments；新 tap trust security、Linux sandboxing、更快内部 JSON API",
+    "why": "Mac 开发环境底座更新；tap trust / Linux sandboxing 贴本机工具链安全和 OpenClaw 节点依赖",
+    "url": "https://brew.sh/2026/06/11/homebrew-6.0.0/",
+    "tags": [
+      "安全"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pc06ca4ba78",
+    "date": "2026-06-11",
+    "round": 0,
+    "grade": "🔥",
+    "title": "snyk/agent-scan (2,553⭐)",
+    "desc": "Snyk 出的 AI agent / MCP / skills 安全扫描器，面向 agent 配置、MCP servers、tool permissions 做风险检查",
+    "why": "贴 OpenClaw tool approval / MCP 安全主线；配置/供应链静态扫描 + CI/GitHub Action 化；[官方替代风险: 低-中]",
+    "url": "https://github.com/snyk/agent-scan",
+    "tags": [
+      "GitHub",
+      "2,553⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pd3da22ca86",
+    "date": "2026-06-11",
+    "round": 0,
+    "grade": "⚡",
+    "title": "anthropics/claude-plugins-official (29,891⭐)",
+    "desc": "Anthropic 官方维护的 Claude Code Plugins 高质量目录",
+    "why": "Claude Code 插件生态官方基线，可作为后续评估第三方插件/skills 的 source of truth；[官方替代风险: 已是官方]",
+    "url": "https://github.com/anthropics/claude-plugins-official",
+    "tags": [
+      "GitHub",
+      "29,891⭐",
+      "CC工作流"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p8ba2264d2a",
+    "date": "2026-06-11",
+    "round": 0,
+    "grade": "⚡",
+    "title": "louislva/claude-peers-mcp (2,095⭐)",
+    "desc": "让多个 Claude Code 实例互相发消息的 MCP，偏 ad-hoc agent-to-agent coordination",
+    "why": "贴 OpenClaw 多 agent 协议/agent 间协作；可对照 OpenClaw sessions/消息路由；[官方替代风险: 中]",
+    "url": "https://github.com/louislva/claude-peers-mcp",
+    "tags": [
+      "GitHub",
+      "2,095⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pf3e9c77282",
+    "date": "2026-06-11",
+    "round": 0,
+    "grade": "💡",
+    "title": "V2EX：吐槽招聘卡年龄现状",
+    "desc": "115 回复；围绕“卡 32 / 卡 35”和招聘结构问题的中文社区讨论",
+    "why": "贴 8 月上海社招；校准中文招聘市场真实情绪，尤其是 7 年经验、转 AI Agent 岗时的年龄/经验叙事",
+    "url": "https://www.v2ex.com/t/1219628",
+    "tags": [
+      "V2EX",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pd8b99ea0a1",
+    "date": "2026-06-11",
+    "round": 0,
+    "grade": "🔥",
+    "title": "luckyPipewrench/pipelock (706⭐)",
+    "desc": "open-source AI agent firewall：拦 MCP / HTTP / A2A / WebSocket 出站流量，查 exfiltration、SSRF、prompt injection，并生成 mediator-signed action receipts",
+    "why": "贴 OpenClaw tool approval / Gateway 审计主线；比上午 hol-guard 更偏“流量/出站防火墙 + 可验证审计证据”；Apache-2.0；[官方替代风险: 低]",
+    "url": "https://github.com/luckyPipewrench/pipelock",
+    "tags": [
+      "GitHub",
+      "706⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pc8e216d742",
+    "date": "2026-06-11",
+    "round": 0,
+    "grade": "⚡",
+    "title": "HelixDB/helix-db (4,828⭐ / HN Show 117pt)",
+    "desc": "Rust 写的 graph-vector OLTP DB：把 graph、vector search、full-text search 合在一起，目标是 AI memory / GraphRAG / company brain",
+    "why": "贴 RAG/Agent memory 主线；价值在“关系图谱 + 向量 + FTS”同库查询，而不是再缝 graph DB + vector DB；Apache-2.0；[官方替代风险: 低-中]",
+    "url": "https://github.com/HelixDB/helix-db",
+    "tags": [
+      "GitHub",
+      "4,828⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pb6bc654794",
+    "date": "2026-06-11",
+    "round": 0,
+    "grade": "⚡",
+    "title": "trycua/cua (17,826⭐)",
+    "desc": "Computer-Use Agents 基础设施：跨 macOS / Linux / Windows 的 sandbox、SDK、benchmark，用来训练和评估能操作完整桌面的 agent",
+    "why": "贴 OpenClaw Node/Browser/桌面自动化方向；不是单个 agent demo，而是 CUA runtime/环境层，适合对照节点能力边界；MIT；[官方替代风险: 中]",
+    "url": "https://github.com/trycua/cua",
+    "tags": [
+      "GitHub",
+      "17,826⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p15635deb7f",
+    "date": "2026-06-11",
+    "round": 0,
+    "grade": "💡",
+    "title": "V2EX：codex 为啥 1 周用量没了，但 5 小时用量还有就不让用了？",
+    "desc": "73 回复；中文社区真实讨论 Codex 周额度/5 小时额度/重度使用的卡点",
+    "why": "贴 Codex/Claude Code 重度使用；最近 X 里也在集中讨论 tokenmaxxing 和订阅/API 成本，这条是中文用户的真实体感",
+    "url": "https://www.v2ex.com/t/1219524",
+    "tags": [
+      "V2EX",
+      "CC工作流"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pb99f175713",
+    "date": "2026-06-11",
+    "round": 0,
+    "grade": "🔥",
+    "title": "hashgraph-online/hol-guard (354⭐)",
+    "desc": "AI harness antivirus：在 Codex / Claude Code / Cursor / Gemini / OpenCode 工具执行前拦截风险动作，扫描 MCP servers、skills、plugins、supply-chain hooks",
+    "why": "贴 OpenClaw tool approval / MCP 安全边界；本地 approval center + receipts + artifact trust；README 标 Apache-2.0，GitHub API 显示 Other；[官方替代风险: 低]",
+    "url": "https://github.com/hashgraph-online/hol-guard",
+    "tags": [
+      "GitHub",
+      "354⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p9e50032e85",
+    "date": "2026-06-11",
+    "round": 0,
+    "grade": "⚡",
+    "title": "preset-io/agor (1,255⭐)",
+    "desc": "Claude Code / Codex / Gemini 的多人协作画布：按 git branch 组织长期 session、worktree、prompt、PR，带实时 canvas、comments、MCP server、scheduler",
+    "why": "团队版 OpenClaw / agent workbench；branch=任务单元、session tree、assistant、message gateway 可对照；license: Other；[官方替代风险: 中]",
+    "url": "https://github.com/preset-io/agor",
+    "tags": [
+      "GitHub",
+      "1,255⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p739efd1c66",
+    "date": "2026-06-11",
+    "round": 0,
+    "grade": "⚡",
+    "title": "heygen-com/hyperframes (26,557⭐)",
+    "desc": "用 HTML/CSS/seekable animations 渲染确定性 MP4，带 agent skills；可以让 coding agent 直接写 HTML 做视频",
+    "why": "贴 React/Remotion/视频自动化支线；agent-friendly 可控渲染 pipeline；Apache-2.0；[官方替代风险: 低-中]",
+    "url": "https://github.com/heygen-com/hyperframes",
+    "tags": [
+      "GitHub",
+      "26,557⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p526b4a8846",
+    "date": "2026-06-11",
+    "round": 0,
+    "grade": "💡",
+    "title": "jgravelle/jcodemunch-mcp (1,908⭐)",
+    "desc": "tree-sitter AST 代码检索 MCP：让 agent 按 symbol / blast radius / call graph 找代码，避免反复整文件 Read",
+    "why": "代码上下文供给线；更偏 token efficiency + structural queries；免费个人用，商业需 license；[官方替代风险: 低-中]",
+    "url": "https://github.com/jgravelle/jcodemunch-mcp",
+    "tags": [
+      "GitHub",
+      "1,908⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pf25f741a7f",
+    "date": "2026-06-10",
+    "round": 0,
+    "grade": "🔥",
+    "title": "agent-infra/sandbox (4,994⭐)",
+    "desc": "All-in-One Sandbox for AI Agents：Browser、Shell、File、MCP、VSCode Server 打进一个 Docker sandbox，给 agent 一整套可隔离执行环境",
+    "why": "贴 OpenClaw tools/code-exec/browser 节点能力；执行环境整合与隔离；Apache-2.0；[官方替代风险: 低]",
+    "url": "https://github.com/agent-infra/sandbox",
+    "tags": [
+      "GitHub",
+      "4,994⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p87b69f6f5c",
+    "date": "2026-06-10",
+    "round": 0,
+    "grade": "⚡",
+    "title": "agentgateway/agentgateway (3,198⭐)",
+    "desc": "Next-generation agentic proxy：给 AI agents / MCP servers 做统一网关代理，方向是 agent traffic control plane",
+    "why": "贴 OpenClaw Gateway；偏 proxy/流量层，适合对照鉴权、审计、路由边界；Apache-2.0；[官方替代风险: 低]",
+    "url": "https://github.com/agentgateway/agentgateway",
+    "tags": [
+      "GitHub",
+      "3,198⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pa75f6700fe",
+    "date": "2026-06-10",
+    "round": 0,
+    "grade": "⚡",
+    "title": "kenn-io/agentsview (1,334⭐)",
+    "desc": "local-first session intelligence for coding agents：支持 Claude Code、Codex 等 20+ agents，号称 ccusage 的 100x faster replacement",
+    "why": "贴 Claude Code 重度使用；agent session/usage/analytics 本地化沉淀，可参考 OpenClaw dashboard/成本观测；MIT；[官方替代风险: 低]",
+    "url": "https://github.com/kenn-io/agentsview",
+    "tags": [
+      "GitHub",
+      "1,334⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p3e7f53380c",
+    "date": "2026-06-10",
+    "round": 0,
+    "grade": "💡",
+    "title": "V2EX：快要迎来全额社保了，大佬们怎么看",
+    "desc": "218 回复；讨论全额社保对到手、企业成本、求职报价的影响",
+    "why": "贴 8 月上海社招和薪资谈判；影响“22K×16 基准涨幅”的税后/企业成本判断",
+    "url": "https://www.v2ex.com/t/1219312",
+    "tags": [
+      "V2EX"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p530ea02278",
+    "date": "2026-06-10",
+    "round": 0,
+    "grade": "🔥",
+    "title": "agentic-community/mcp-gateway-registry (684⭐)",
+    "desc": "Enterprise-ready MCP Gateway & Registry：OAuth、动态 tool discovery、统一 MCP tool access、Keycloak/Entra、审计，把“散落的 MCP servers”收进一个可治理入口",
+    "why": "贴 OpenClaw Gateway / MCP 权限边界；registry + OAuth + audit + enterprise control plane；Apache-2.0；[官方替代风险: 低]",
+    "url": "https://github.com/agentic-community/mcp-gateway-registry",
+    "tags": [
+      "GitHub",
+      "684⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p3eef8fa2e7",
+    "date": "2026-06-10",
+    "round": 0,
+    "grade": "⚡",
+    "title": "rivet-dev/secure-exec (901⭐)",
+    "desc": "不靠 Docker/VM 的 secure Node.js execution：npm-compatible sandboxing，面向 agent code execution / code interpreter 场景",
+    "why": "贴 OpenClaw tools/code-exec 安全层；轻量隔离执行 JS/Node 工具；Apache-2.0；[官方替代风险: 低]",
+    "url": "https://github.com/rivet-dev/secure-exec",
+    "tags": [
+      "GitHub",
+      "901⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pf71dfb6f91",
+    "date": "2026-06-10",
+    "round": 0,
+    "grade": "⚡",
+    "title": "lintsinghua/claude-code-book (3,612⭐)",
+    "desc": "中文 42 万字拆 Claude Code / Agent Harness：从对话循环、tool use、MCP 到自己构建 harness",
+    "why": "适合把 Claude Code 使用经验沉淀成 Agent Harness 工程理解；license 未标注；[官方替代风险: 低]",
+    "url": "https://github.com/lintsinghua/claude-code-book",
+    "tags": [
+      "GitHub",
+      "3,612⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p88901cbbec",
+    "date": "2026-06-10",
+    "round": 0,
+    "grade": "💡",
+    "title": "V2EX：收到一个 offer 去上海该去吗？",
+    "desc": "102 回复；厦门 12K×12 外企 WLB vs 上海 20K×12+0-6 月年终硬核科研项目",
+    "why": "贴 8 月上海优先社招；观察中文社区对去上海换成长/薪资/WLB 的真实取舍",
+    "url": "https://www.v2ex.com/t/1219270",
+    "tags": [
+      "V2EX"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pec1d7f40f9",
+    "date": "2026-06-09",
+    "round": 0,
+    "grade": "🔥",
+    "title": "HarmonicSecurity/claudit-sec (290⭐)",
+    "desc": "macOS 上一条命令审计 Claude Desktop / Claude Code：MCP servers、extensions、plugins、connectors、scheduled tasks、permissions 全列出来",
+    "why": "贴 Claude Code 重度使用 + MCP 安全；本机审计/可见性；Apache-2.0；[官方替代风险: 低]",
+    "url": "https://github.com/HarmonicSecurity/claudit-sec",
+    "tags": [
+      "GitHub",
+      "290⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pf1e40f5f53",
+    "date": "2026-06-09",
+    "round": 0,
+    "grade": "⚡",
+    "title": "smart-mcp-proxy/mcpproxy-go (250⭐)",
+    "desc": "Go 写的 MCP proxy：tool routing、audit logging、BM25/context-window、Web UI，把 MCP 工具访问加一层安全/路由控制",
+    "why": "贴 OpenClaw Gateway/MCP 权限边界；适合对照工具审计和路由；MIT；[官方替代风险: 低]",
+    "url": "https://github.com/smart-mcp-proxy/mcpproxy-go",
+    "tags": [
+      "GitHub",
+      "250⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p40da50143d",
+    "date": "2026-06-09",
+    "round": 0,
+    "grade": "⚡",
+    "title": "LvcidPsyche/auto-browser (541⭐)",
+    "desc": "MCP-native browser agent：给 agent 一个真实浏览器 + human-in-the-loop，Python/FastAPI/Playwright/noVNC，可自部署",
+    "why": "贴 OpenClaw Browser Bridge；本地/自部署 + 人类接管点；MIT；[官方替代风险: 低-中]",
+    "url": "https://github.com/LvcidPsyche/auto-browser",
+    "tags": [
+      "GitHub",
+      "541⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p905edbd8d0",
+    "date": "2026-06-09",
+    "round": 0,
+    "grade": "💡",
+    "title": "Signet-AI/signetai (191⭐)",
+    "desc": "local-first identity / memory / secrets for AI agents：把 agent state 做成可在 Claude Code、OpenClaw、opencode 等 harness 间迁移的便携层",
+    "why": "跨 harness 的身份/记忆/secrets；license: Other；[官方替代风险: 低]",
+    "url": "https://github.com/Signet-AI/signetai",
+    "tags": [
+      "GitHub",
+      "191⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pcd19befc87",
+    "date": "2026-06-09",
+    "round": 0,
+    "grade": "💡",
+    "title": "V2EX：被公安请去喝茶了，提醒不续费域名记得取消备案",
+    "desc": "63 回复；旧域名不用了但备案还挂在公司名下，后续被新内容牵连",
+    "why": "贴 hiveden 域名方向；提醒域名/备案/安全债",
+    "url": "https://www.v2ex.com/t/1219106",
+    "tags": [
+      "V2EX",
+      "安全"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pe6bf23dc1a",
+    "date": "2026-06-09",
+    "round": 0,
+    "grade": "🔥",
+    "title": "OpenCoworkAI/open-cowork (1,536⭐)",
+    "desc": "开源 AI agent desktop：一键装 Claude Code、MCP tools、Skills，带 sandbox isolation、多模型和飞书/Slack 集成",
+    "why": "贴 OpenClaw 的“普通人可安装桌面壳”方向；MIT；[官方替代风险: 低-中]",
+    "url": "https://github.com/OpenCoworkAI/open-cowork",
+    "tags": [
+      "GitHub",
+      "1,536⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p29de3e42bd",
+    "date": "2026-06-09",
+    "round": 0,
+    "grade": "⚡",
+    "title": "bartolli/codanna (690⭐)",
+    "desc": "local code intelligence MCP server + CLI：给 coding agent 一个本地代码索引/检索层",
+    "why": "贴 RAG/MCP/Agent 求职主线；价值在代码上下文供给；Apache-2.0；[官方替代风险: 低]",
+    "url": "https://github.com/bartolli/codanna",
+    "tags": [
+      "GitHub",
+      "690⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pb5114c0996",
+    "date": "2026-06-09",
+    "round": 0,
+    "grade": "⚡",
+    "title": "skalesapp/skales (1,049⭐)",
+    "desc": "personal AI desktop agent：桌面 + 浏览器自动化、Teams、A2A、Workflows、SKILL.md、Recurring tasks，支持 Win/macOS/Linux/Android",
+    "why": "像“面向非开发者的 OpenClaw 形态”；看它怎么包装多设备、多 agent、周期任务和 skill 迁移；license: Other；[官方替代风险: 中]",
+    "url": "https://github.com/skalesapp/skales",
+    "tags": [
+      "GitHub",
+      "1,049⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pc48bf88675",
+    "date": "2026-06-09",
+    "round": 0,
+    "grade": "💡",
+    "title": "HN / Cognition FrontierCode (166pt)",
+    "desc": "coding agent benchmark 从“题做对”转向“真实 repo 里能不能合并”：代码质量、scope、review、测试都算分",
+    "why": "不是模型论文；更像 agent coding 项目验收 rubric。portfolio 不能只 demo，要证明 mergeability",
+    "url": "https://cognition.ai/blog/frontier-code",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p52aa2d5361",
+    "date": "2026-06-09",
+    "round": 0,
+    "grade": "🔥",
+    "title": "remorses/playwriter (3,586⭐)",
+    "desc": "Chrome extension + CLI + MCP：让 agent 在有状态浏览器里跑 Playwright snippets，带 sandbox，不是只能开一次性的 browser tool",
+    "why": "贴 OpenClaw Browser Bridge/节点能力；可作为 agent 浏览器控制层参考；MIT；[官方替代风险: 低]",
+    "url": "https://github.com/remorses/playwriter",
+    "tags": [
+      "GitHub",
+      "3,586⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p64a7a3444e",
+    "date": "2026-06-09",
+    "round": 0,
+    "grade": "⚡",
+    "title": "NevaMind-AI/memU (13,808⭐)",
+    "desc": "memory harness for proactive agents：结构化存储、intent capture、token reduction，目标是给长跑 agent 做可控记忆层",
+    "why": "贴 OpenClaw memory/多 Agent 长任务；价值在记忆工程和 token 压缩；license: Other；[官方替代风险: 中]",
+    "url": "https://github.com/NevaMind-AI/memU",
+    "tags": [
+      "GitHub",
+      "13,808⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pc8e4e5c128",
+    "date": "2026-06-09",
+    "round": 0,
+    "grade": "⚡",
+    "title": "moltis-org/moltis (2,731⭐)",
+    "desc": "Rust 写的 personal agent server：单 binary、本机运行、sandboxed execution、多 IM 通道、memory、MCP tools",
+    "why": "像 Rust 版轻量 OpenClaw server，适合对照个人 agent server 安全边界、IM 接入和部署形态；MIT；[官方替代风险: 低]",
+    "url": "https://github.com/moltis-org/moltis",
+    "tags": [
+      "GitHub",
+      "2,731⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p881511e2f7",
+    "date": "2026-06-09",
+    "round": 0,
+    "grade": "💡",
+    "title": "mcp-use/mcp-use (10,072⭐)",
+    "desc": "fullstack MCP framework：同时做 MCP Apps for ChatGPT/Claude 和 MCP Servers for agents",
+    "why": "MCP 生态从 server demo 转向可分发 MCP app；适合拆 app/server 双形态；MIT；[官方替代风险: 中]",
+    "url": "https://github.com/mcp-use/mcp-use",
+    "tags": [
+      "GitHub",
+      "10,072⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p11536641bd",
+    "date": "2026-06-08",
+    "round": 0,
+    "grade": "🔥",
+    "title": "always-further/nono (2,604⭐)",
+    "desc": "capability-based agent runtime：在 agent 运行上下文里做细粒度权限策略和 access brokering，目标是 zero setup / zero latency",
+    "why": "贴 OpenClaw 的工具权限/审批/能力边界主线；不是又一个 agent 框架，而是“agent 能碰什么、何时能碰”的安全执行层；Apache-2.0；[官方替代风险: 低]",
+    "url": "https://github.com/always-further/nono",
+    "tags": [
+      "GitHub",
+      "2,604⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p80294f3603",
+    "date": "2026-06-08",
+    "round": 0,
+    "grade": "⚡",
+    "title": "archestra-ai/archestra (3,813⭐)",
+    "desc": "enterprise AI platform：guardrails、MCP registry、gateway、orchestrator 放在一起管",
+    "why": "适合对照 OpenClaw/Gateway/MCP registry 的产品化边界；企业真正缺的常常不是 chat UI，而是权限、网关、审计和治理；AGPL-3.0；[官方替代风险: 中]",
+    "url": "https://github.com/archestra-ai/archestra",
+    "tags": [
+      "GitHub",
+      "3,813⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p69719bd0e2",
+    "date": "2026-06-08",
+    "round": 0,
+    "grade": "⚡",
+    "title": "golf-mcp/golf (828⭐)",
+    "desc": "production-ready MCP server framework：Auth、Observability、Debugger、Telemetry、Runtime 都内置",
+    "why": "贴 MCP Server 求职方向；可拆“一个生产级 MCP server 除了 tools 定义还要补哪些工程件”；Apache-2.0；[官方替代风险: 低-中]",
+    "url": "https://github.com/golf-mcp/golf",
+    "tags": [
+      "GitHub",
+      "828⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p326dea796d",
+    "date": "2026-06-08",
+    "round": 0,
+    "grade": "💡",
+    "title": "duncatzat/vigils (320⭐)",
+    "desc": "local control plane for AI agents：Rust + Tauri + Chrome MV3，本地看 agent 做了什么、审批关键动作、防 secrets 外泄",
+    "why": "贴 OpenClaw 节点/浏览器/审批体验；star 不高所以只放备选，但“本地代理控制台 + secret guard”方向值得留意；Apache-2.0；[官方替代风险: 低]",
+    "url": "https://github.com/duncatzat/vigils",
+    "tags": [
+      "GitHub",
+      "320⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p8703219a7f",
+    "date": "2026-06-08",
+    "round": 0,
+    "grade": "🔥",
+    "title": "vstorm-co/pydantic-deepagents (848⭐)",
+    "desc": "Python 版 Claude Code-style deep agents：tool-calling、sandboxed execution、multi-agent teams、skills、checkpoints、unlimited context，基于 Pydantic AI",
+    "why": "贴 Python agent runtime + sandbox + subagents；适合作为 LangGraph/MCP/ReAct 工程化对照样本；MIT；[官方替代风险: 中]",
+    "url": "https://github.com/vstorm-co/pydantic-deepagents",
+    "tags": [
+      "GitHub",
+      "848⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pc003b0dd7b",
+    "date": "2026-06-08",
+    "round": 0,
+    "grade": "⚡",
+    "title": "portofcontext/pctx (262⭐)",
+    "desc": "agentic tool call execution layer：把 agent tools / MCP servers 自动转成在 secure sandbox 中运行的代码，减少 token 往返",
+    "why": "贴 OpenClaw 工具执行层；把“工具调用”变成可控、可复现、token-efficient 的执行层；MIT；[官方替代风险: 低]",
+    "url": "https://github.com/portofcontext/pctx",
+    "tags": [
+      "GitHub",
+      "262⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p92d1260ebe",
+    "date": "2026-06-08",
+    "round": 0,
+    "grade": "⚡",
+    "title": "0xMassi/webclaw (1,308⭐)",
+    "desc": "Rust 写的 local-first web extraction：scrape/crawl/structured extraction，CLI + REST API + MCP server，定位 Firecrawl alternative",
+    "why": "适合 Radar/Scout 信息采集链路；本地优先 + MCP + HTML→Markdown/structured data；AGPL-3.0；[官方替代风险: 低]",
+    "url": "https://github.com/0xMassi/webclaw",
+    "tags": [
+      "GitHub",
+      "1,308⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pb5ece0533e",
+    "date": "2026-06-08",
+    "round": 0,
+    "grade": "💡",
+    "title": "devenjarvis/lathe (732⭐ / Show HN 297pt)",
+    "desc": "用 LLM 生成 source-backed hands-on tutorials，但强制你自己读、自己敲代码，不是替你完成",
+    "why": "适合求职前补陌生技术域；LLM 当教程生成器 + 校验器，但保留手写代码的学习摩擦；MIT；[官方替代风险: 低]",
+    "url": "https://github.com/devenjarvis/lathe",
+    "tags": [
+      "GitHub",
+      "732⭐"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p342c84ae7f",
+    "date": "2026-06-08",
+    "round": 0,
+    "grade": "💡",
+    "title": "V2EX：月 base 40k 的 AI 开发专家值得去吗？",
+    "desc": "64 回复；33 岁、当前 22k、不加班，拿到北京未上市公司 AI 开发专家 offer 的取舍讨论",
+    "why": "贴 8 月社招；观察中文社区对“AI 开发专家”岗位薪资、城市、加班、转型溢价的真实判断",
+    "url": "https://www.v2ex.com/t/1218698",
+    "tags": [
+      "V2EX"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p98a1681306",
+    "date": "2026-06-08",
+    "round": 0,
+    "grade": "🔥",
+    "title": "Vexa-ai/vexa (2,148⭐)",
+    "desc": "self-hosted meeting bot / transcription API：Google Meet / Teams / Zoom 自动入会、实时转写、WebSocket transcript，自带 17 个 MCP meeting tools",
+    "why": "贴 AI Agent 全栈；能让 agent 入会、读 transcript、发言/聊天/共享屏幕；Apache-2.0；[官方替代风险: 低]",
+    "url": "https://github.com/Vexa-ai/vexa",
+    "tags": [
+      "GitHub",
+      "2,148⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p5e61b12cac",
+    "date": "2026-06-08",
+    "round": 0,
+    "grade": "⚡",
+    "title": "bytedance/deer-flow (70,672⭐)",
+    "desc": "long-horizon SuperAgent harness：research / code / create，带 sandbox、memory、tools、skills、subagents、message gateway",
+    "why": "和 OpenClaw 多 Agent/session/gateway/memory 方向高度同构，适合拆“长任务 agent 工程化”；MIT；[官方替代风险: 中]",
+    "url": "https://github.com/bytedance/deer-flow",
+    "tags": [
+      "GitHub",
+      "70,672⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pa918c5834b",
+    "date": "2026-06-08",
+    "round": 0,
+    "grade": "⚡",
+    "title": "mattpocock/sandcastle (5,805⭐)",
+    "desc": "TypeScript 里编排 sandboxed coding agents：`sandcastle.run()` 风格，把 coding agent 放进可控沙箱执行",
+    "why": "比昨天几类 sandbox 更偏开发者 SDK，适合对照 OpenClaw agent 执行层产品化；MIT；[官方替代风险: 低]",
+    "url": "https://github.com/mattpocock/sandcastle",
+    "tags": [
+      "GitHub",
+      "5,805⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pc56eb9016a",
+    "date": "2026-06-08",
+    "round": 0,
+    "grade": "💡",
+    "title": "poco-ai/poco-claw (1,332⭐)",
+    "desc": "更 UI 化的 OpenClaw alternative：Web UI、IM、sandboxed runtime、channel-based team collaboration，底层 Claude Code agent",
+    "why": "不建议迁移，但值得看它怎么包装 OpenClaw 类产品：团队频道、IM、Web UI；MIT；[官方替代风险: 低-中]",
+    "url": "https://github.com/poco-ai/poco-claw",
+    "tags": [
+      "GitHub",
+      "1,332⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p06c37ce8ae",
+    "date": "2026-06-07",
+    "round": 0,
+    "grade": "🔥",
+    "title": "mksglu/context-mode (16,562⭐)",
+    "desc": "Context window optimization for AI coding agents：把冗长 tool output 沙箱化/压缩，标称 98% reduction，覆盖 Claude Code / Codex / Copilot / OpenClaw 等 15 平台",
+    "why": "贴 CC/OpenClaw 高频痛点；减少 agent 被 kubectl/docker/git 等输出塞爆上下文；license: Other；[官方替代风险: 中]",
+    "url": "https://github.com/mksglu/context-mode",
+    "tags": [
+      "GitHub",
+      "16,562⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p6b36ae5860",
+    "date": "2026-06-07",
+    "round": 0,
+    "grade": "⚡",
+    "title": "agent-infra/sandbox (4,918⭐)",
+    "desc": "All-in-One Sandbox for AI Agents：Browser、Shell、File、MCP、VSCode Server 放进单个 Docker 容器",
+    "why": "适合对照 OpenClaw Node/Browser Bridge；可丢弃、可复现的执行桌面；Apache-2.0；[官方替代风险: 低]",
+    "url": "https://github.com/agent-infra/sandbox",
+    "tags": [
+      "GitHub",
+      "4,918⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pe8003ec006",
+    "date": "2026-06-07",
+    "round": 0,
+    "grade": "⚡",
+    "title": "superradcompany/microsandbox (6,442⭐)",
+    "desc": "local-first + microVM-backed programmable sandboxes for AI agents",
+    "why": "agent 安全执行主线；microVM + local-first，适合做执行层横向对比；Apache-2.0；[官方替代风险: 低]",
+    "url": "https://github.com/superradcompany/microsandbox",
+    "tags": [
+      "GitHub",
+      "6,442⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pbbea544e4e",
+    "date": "2026-06-07",
+    "round": 0,
+    "grade": "💡",
+    "title": "harshkedia177/axon (709⭐)",
+    "desc": "codebase knowledge graph + MCP/CLI：把代码库索引成知识图谱，给 coding agent 做 code intelligence / dead code detection",
+    "why": "贴 Context Engineering；比单纯 RAG 更结构化，适合探索代码上下文供给方式；license: 未标注；[官方替代风险: 低-中]",
+    "url": "https://github.com/harshkedia177/axon",
+    "tags": [
+      "GitHub",
+      "709⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p05a8364a10",
+    "date": "2026-06-07",
+    "round": 0,
+    "grade": "🔥",
+    "title": "agentscope-ai/agentscope-runtime (809⭐)",
+    "desc": "Agent app runtime：secure tool sandbox、Agent-as-a-Service API、K8s/serverless 部署、observability 都放进运行时层",
+    "why": "贴 LangGraph/MCP/Agent 工程化；运行时/沙箱/可观测架构层；Apache-2.0；[官方替代风险: 低-中]",
+    "url": "https://github.com/agentscope-ai/agentscope-runtime",
+    "tags": [
+      "GitHub",
+      "809⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p4dc600a367",
+    "date": "2026-06-07",
+    "round": 0,
+    "grade": "⚡",
+    "title": "builderz-labs/mission-control (5,202⭐)",
+    "desc": "self-hosted AI agent orchestration dashboard：派发任务、多 agent workflow、花费监控、运营治理一个台子管",
+    "why": "适合和 OpenClaw/Radar/Scout 多 Agent 运维台对标；MIT；[官方替代风险: 中]",
+    "url": "https://github.com/builderz-labs/mission-control",
+    "tags": [
+      "GitHub",
+      "5,202⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pca91e48b22",
+    "date": "2026-06-07",
+    "round": 0,
+    "grade": "⚡",
+    "title": "abshkbh/arrakis (816⭐)",
+    "desc": "self-hosted MicroVM sandbox for AI agent code execution / computer use，支持 backtracking、多步 workflow、REST API/Python SDK",
+    "why": "Agent 执行代码/浏览器任务时，隔离和可回滚比“多写 prompt”重要；AGPL-3.0；[官方替代风险: 低]",
+    "url": "https://github.com/abshkbh/arrakis",
+    "tags": [
+      "GitHub",
+      "816⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p0b0f16c4c8",
+    "date": "2026-06-07",
+    "round": 0,
+    "grade": "💡",
+    "title": "BlackSnufkin/LitterBox (1,443⭐)",
+    "desc": "red team payload sandbox + MCP：让 LLM agent 端到端驱动检测前分析",
+    "why": "偏 AI 安全/红队，和 Alex 主动问过的 AI 安全方向贴；GPL-3.0；[官方替代风险: 低]",
+    "url": "https://github.com/BlackSnufkin/LitterBox",
+    "tags": [
+      "GitHub",
+      "1,443⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pbbf9c36c1e",
+    "date": "2026-06-07",
+    "round": 0,
+    "grade": "💡",
+    "title": "Show HN: Poincake",
+    "desc": "非欧几里得 Poincaré disk 无限画布笔记；作者说 LLM 帮他处理了坐标系/优化算法",
+    "why": "个人开发者用 LLM 啃掉数学门槛，做出奇怪 HCI demo；HN Show 127pt",
+    "url": "https://uonr.github.io/poincake/",
+    "tags": [],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p2d40e2a1a6",
+    "date": "2026-06-06",
+    "round": 0,
+    "grade": "🔥",
+    "title": "github/spec-kit (109,381⭐)",
+    "desc": "GitHub 官方 Spec-Driven Development 工具包：把 vibe coding 前面的需求/验收条件先固化，再交给 agent 执行",
+    "why": "贴 Agent 自循环/工程化主线；开发契约层，能让 agent 少乱跑；MIT；[官方替代风险: 低（官方工具本身）]",
+    "url": "https://github.com/github/spec-kit",
+    "tags": [
+      "GitHub",
+      "109,381⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p3592f765cb",
+    "date": "2026-06-06",
+    "round": 0,
+    "grade": "⚡",
+    "title": "nduckmink/arkon (958⭐)",
+    "desc": "self-hosted AI Knowledge Hub + MCP Server：团队知识库、RAG contexts、访问策略、AI skills 放在一起管",
+    "why": "适合对比 OpenClaw/MemOS/RAG 记忆层；知识库 + 权限 + MCP 接入；license: Other；[官方替代风险: 低-中]",
+    "url": "https://github.com/nduckmink/arkon",
+    "tags": [
+      "GitHub",
+      "958⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p95a0f18437",
+    "date": "2026-06-06",
+    "round": 0,
+    "grade": "⚡",
+    "title": "OpenCoworkAI/open-cowork (1,516⭐)",
+    "desc": "Windows/macOS 桌面 AI Agent app：一键装 Claude Code、MCP tools、Skills，带 sandbox isolation 和飞书/Slack 集成",
+    "why": "适合和 OpenClaw 对标，反推普通团队使用 CC/MCP 的产品化边界；MIT；[官方替代风险: 中]",
+    "url": "https://github.com/OpenCoworkAI/open-cowork",
+    "tags": [
+      "GitHub",
+      "1,516⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pddcf669d8e",
+    "date": "2026-06-06",
+    "round": 0,
+    "grade": "💡",
+    "title": "V2EX：秀一秀 — vibe coding 作品展示平台",
+    "desc": "56 回复，讨论 vibe coding 产品冷启动、曝光和反馈循环",
+    "why": "不是“零代码做了 XX”，而是 AI 生成品泛滥后的分发/反馈问题",
+    "url": "https://www.v2ex.com/t/1218305",
+    "tags": [
+      "V2EX"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pea1549de8a",
+    "date": "2026-06-06",
+    "round": 0,
+    "grade": "💡",
+    "title": "LINUX DO：RawChat codex 公益站运行方式调整通知",
+    "desc": "144 posts / 19 replies，中转/公益站被滥用后的运营调整现场",
+    "why": "API/中转/CLI 用户需要关注的真实运营风险",
+    "url": "https://linux.do/t/topic/2316389",
+    "tags": [
+      "LINUX DO",
+      "终端工具"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p9795903381",
+    "date": "2026-06-06",
+    "round": 0,
+    "grade": "🔥",
+    "title": "Onelevenvy/flock (1,076⭐)",
+    "desc": "Rust/Tauri/React 桌面 multi-agent harness，基于 langgraph-rust，把 agent 工作流做成可视化桌面编排/运行台",
+    "why": "贴 OpenClaw 多 Agent + LangGraph/Rust/Tauri；不是“又一个聊天 UI”，更像本地 Agent 控制台雏形；Apache-2.0；[官方替代风险: 低-中]",
+    "url": "https://github.com/Onelevenvy/flock",
+    "tags": [
+      "GitHub",
+      "1,076⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "padcf1d7622",
+    "date": "2026-06-06",
+    "round": 0,
+    "grade": "⚡",
+    "title": "bytebot-ai/bytebot (11,043⭐)",
+    "desc": "self-hosted AI desktop agent：在容器化 Linux 桌面里执行自然语言电脑任务，带 MCP/Computer Use 方向",
+    "why": "适合对比 OpenClaw Browser/Node 自动化；容器隔离比直接操控日常桌面更安全可复现；Apache-2.0；[官方替代风险: 中]",
+    "url": "https://github.com/bytebot-ai/bytebot",
+    "tags": [
+      "GitHub",
+      "11,043⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p2ed09220db",
+    "date": "2026-06-06",
+    "round": 0,
+    "grade": "⚡",
+    "title": "V2EX：为什么 AI 很火，却很少在传统行业真正铺开？",
+    "desc": "41 回复，讨论企业 AI 落地卡在文档解析、旧流程嵌入、数据安全这些脏活",
+    "why": "非常贴 AI Agent 求职：面试讲“AI 应用落地难点”，比背框架名有用",
+    "url": "https://www.v2ex.com/t/1218246",
+    "tags": [
+      "V2EX",
+      "Agent",
+      "安全"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p7d09d647d3",
+    "date": "2026-06-06",
+    "round": 0,
+    "grade": "💡",
+    "title": "StuMason/coolify-mcp (411⭐)",
+    "desc": "给 Coolify 的 MCP server，用 42 个工具让 AI assistant 管自部署 PaaS",
+    "why": "窄场景 MCP，适合自部署工具链；MIT；[官方替代风险: 低]",
+    "url": "https://github.com/StuMason/coolify-mcp",
+    "tags": [
+      "GitHub",
+      "411⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pb892b5a323",
+    "date": "2026-06-06",
+    "round": 0,
+    "grade": "💡",
+    "title": "LINUX DO：永久容器部署 MClaw / cliproxyapi / openlist 指南",
+    "desc": "96 posts / 65 replies，中文社区真实部署 OpenClaw 类工具链的折腾记录",
+    "why": "适合观察中文社区怎么把 AI CLI、代理、文件服务塞进长期容器里跑",
+    "url": "https://linux.do/t/topic/2308123",
+    "tags": [
+      "LINUX DO",
+      "终端工具"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pf37e6711cd",
+    "date": "2026-06-06",
+    "round": 0,
+    "grade": "🔥",
+    "title": "zdk/lowfat (221⭐ / Show HN 120pt)",
+    "desc": "pluggable CLI filter：把 kubectl/docker/git 这类冗长输出瘦身给 coding agent，用 2 个月个人数据声称省 91.8% tokens",
+    "why": "非常贴 Alex 的 CC/OpenClaw workflow；本地单文件/无遥测/可做 agent hook；Apache-2.0；[官方替代风险: 低-中]",
+    "url": "https://github.com/zdk/lowfat",
+    "tags": [
+      "GitHub",
+      "221⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pd18c39001e",
+    "date": "2026-06-06",
+    "round": 0,
+    "grade": "⚡",
+    "title": "NicholasGoh/fastapi-mcp-langgraph-template (547⭐)",
+    "desc": "FastAPI + MCP + LangGraph + Supabase/Langfuse/Grafana/Prometheus 的全栈 Agent 模板",
+    "why": "和 Alex 求职方向 Python FastAPI + LangGraph + MCP 直接对齐；MIT；[官方替代风险: 低]",
+    "url": "https://github.com/NicholasGoh/fastapi-mcp-langgraph-template",
+    "tags": [
+      "GitHub",
+      "547⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p35a45a59ee",
+    "date": "2026-06-06",
+    "round": 0,
+    "grade": "⚡",
+    "title": "alash3al/stash (710⭐)",
+    "desc": "self-hosted Agent memory layer：episodes/facts/working context 存 Postgres，自带 MCP server，单 binary",
+    "why": "适合对比 OpenClaw/MemOS/多 Agent 记忆方案；Apache-2.0；[官方替代风险: 低]",
+    "url": "https://github.com/alash3al/stash",
+    "tags": [
+      "GitHub",
+      "710⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p1cd69cb858",
+    "date": "2026-06-06",
+    "round": 0,
+    "grade": "💡",
+    "title": "LINUX DO：在 Linux 上跑 Codex 比 Windows 顺畅太多了",
+    "desc": "100 posts / 53 replies，一个很现实的 Codex/CLI 运行环境讨论",
+    "why": "适合看中文社区对 Codex CLI 在不同系统下的真实体感和坑点",
+    "url": "https://linux.do/t/topic/2258279",
+    "tags": [
+      "LINUX DO",
+      "终端工具"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pebf119192f",
+    "date": "2026-06-05",
+    "round": 0,
+    "grade": "🔥",
+    "title": "ChromeDevTools/chrome-devtools-mcp (42,896⭐)",
+    "desc": "官方 Chrome DevTools MCP：让 coding agent 直接读页面、看性能、抓 console/network",
+    "why": "和 OpenClaw Browser Bridge / Browser 自动化调试直接相关；本地 MCP；[官方替代风险: 低（官方工具本身）]",
+    "url": "https://github.com/ChromeDevTools/chrome-devtools-mcp",
+    "tags": [
+      "GitHub",
+      "42,896⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pcc3e0d4523",
+    "date": "2026-06-05",
+    "round": 0,
+    "grade": "⚡",
+    "title": "V2EX：纯吐槽公司技术团队现状",
+    "desc": "175 回复，一个爬虫工程师转 AI Agent 后被全公司 AI 需求“吸血”的现场",
+    "why": "和 Alex 转 AI Agent 全栈的职场定位很贴：会 Agent 的人会被当成“AI 接口总包”，评论区有真实组织协作样本",
+    "url": "https://www.v2ex.com/t/1218058",
+    "tags": [
+      "V2EX",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pc24399f2f9",
+    "date": "2026-06-05",
+    "round": 0,
+    "grade": "💡",
+    "title": "emarco177/langgraph-course (591⭐)",
+    "desc": "LangGraph 实战课程仓库：Agentic RAG、ReAct、reflection workflows",
+    "why": "不是框架评测，是可直接补 Alex 训练营/面试项目素材的 hands-on repo；[官方替代风险: 低]",
+    "url": "https://github.com/emarco177/langgraph-course",
+    "tags": [
+      "GitHub",
+      "591⭐"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pe6e02992e2",
+    "date": "2026-06-05",
+    "round": 0,
+    "grade": "💡",
+    "title": "V2EX：美国家宽 + 苹果内购，ChatGPT 账号仍被封",
+    "desc": "101 回复，账号风控真实案例",
+    "why": "Alex 重度用 API/中转/多端工具，适合关注账号安全和风控边界",
+    "url": "https://www.v2ex.com/t/1218155",
+    "tags": [
+      "V2EX",
+      "安全"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p76b5d2ec90",
+    "date": "2026-06-05",
+    "round": 0,
+    "grade": "🔥",
+    "title": "agentgateway/agentgateway (3,059⭐)",
+    "desc": "Rust 写的 AI Agent/MCP Gateway，把 MCP server、agent proxy、API gateway 往基础设施层收拢",
+    "why": "比“又一个 agent 框架”更像未来 OpenClaw/MCP 的网关层；Apache-2.0；[官方替代风险: 低-中]",
+    "url": "https://github.com/agentgateway/agentgateway",
+    "tags": [
+      "GitHub",
+      "3,059⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pe1512d66ac",
+    "date": "2026-06-05",
+    "round": 0,
+    "grade": "⚡",
+    "title": "RagaAI-Catalyst (16,170⭐)",
+    "desc": "自部署 Agent observability/evaluation：trace、debug multi-agent、timeline/execution graph",
+    "why": "Alex 在做多 Agent 系统，价值在可观测和评估，不是模型层；Apache-2.0；[官方替代风险: 低]",
+    "url": "https://github.com/raga-ai-hub/RagaAI-Catalyst",
+    "tags": [
+      "GitHub",
+      "16,170⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p5f18f9c081",
+    "date": "2026-06-05",
+    "round": 0,
+    "grade": "💡",
+    "title": "V2EX：大家是怎么使用 AI 的，真能做到不手写代码吗",
+    "desc": "73 回复，真实业务 AI coding 翻车现场",
+    "why": "和 Alex 的 CC/Agent workflow 很贴，评论区比工具发布更有“真实生产力差距”参考价值",
+    "url": "https://www.v2ex.com/t/1218201",
+    "tags": [
+      "V2EX",
+      "Agent",
+      "CC工作流"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pe1fae83417",
+    "date": "2026-06-05",
+    "round": 0,
+    "grade": "💡",
+    "title": "LINUX DO：公益站被拿去高价倒卖",
+    "desc": "197 赞 / 18 回复，AI 中转站生态的灰产/信任问题",
+    "why": "Alex 是 apiyi 用户，适合跟踪中转站安全、滥用、商业模式风险",
+    "url": "https://linux.do/t/topic/2310491",
+    "tags": [
+      "LINUX DO",
+      "安全"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  }
+];
+
+// ═══ Board engine（_base.html 共享，radar/pulse 通过 BOARD_CONFIG 差异化）═══
+const C = BOARD_CONFIG;
+
+const STATES = [
+  { key: 'watching',  chip: '👀 关注中', action: '👀 关注', on: 'on-watch' },
+  { key: 'discussed', chip: '💬 讨论中', action: '💬 讨论', on: 'on-discuss' },
+  { key: 'confirmed', chip: '✓ 已确认',  action: '✓ 确认',  on: 'on-confirm' },
+  { key: 'dismissed', chip: '已忽略',    action: '✕ 忽略',  on: 'on-dismiss' },
 ];
 
 // ─── State ──────────────────────────────────────────────────────────────────
-const SK = 'radar_v2';
-let S = JSON.parse(localStorage.getItem(SK)||'{}');
-const getS = id => (S[id]||{status:'unread'}).status;
-const setS = (id,st) => { S[id]={status:st}; localStorage.setItem(SK,JSON.stringify(S)); };
+const SK = C.storageKey, SF = C.stateField;
+let S = JSON.parse(localStorage.getItem(SK) || '{}');
+if (C.migrate) C.migrate(S);
+if (C.seedState) {
+  DATA.forEach(d => {
+    const seed = C.seedState(d);
+    if (!S[d.id] && seed && seed !== 'unread') S[d.id] = { [SF]: seed };
+  });
+}
+localStorage.setItem(SK, JSON.stringify(S));
+const getS = id => (S[id] || {})[SF] || 'unread';
+const setS = (id, st) => { S[id] = { [SF]: st }; localStorage.setItem(SK, JSON.stringify(S)); };
 
 // ─── Filter ─────────────────────────────────────────────────────────────────
-let curFilter = 'all', curQ = '';
-const gradeKey = g => g==='🔥'?'fire':g==='⚡'?'bolt':'bulb';
+let curFilter = 'all', curCat = '', curQ = '';
+const FALLBACK_GRADE = C.grades.find(g => g.fallback) || C.grades[C.grades.length - 1];
+const gradeOf = d => C.grades.find(g => g.emoji === d.grade) || FALLBACK_GRADE;
+const catsOf = d => C.categoriesOf(d) || [];
 
 function matches(d) {
-  const st = getS(d.id);
-  const gk = gradeKey(d.grade);
-  if (curFilter==='unread' && st!=='unread') return false;
-  if (curFilter==='watching' && st!=='watching') return false;
-  if (curFilter==='discussed' && st!=='discussed') return false;
-  if (curFilter==='dismissed' && st!=='dismissed') return false;
-  if (curFilter==='fire' && gk!=='fire') return false;
-  if (curFilter==='bolt' && gk!=='bolt') return false;
-  if (curFilter==='bulb' && gk!=='bulb') return false;
-  if (curQ) {
-    const hay = (d.title+' '+d.desc+' '+(d.why||'')).toLowerCase();
-    if (!hay.includes(curQ.toLowerCase())) return false;
+  if (curFilter !== 'all') {
+    const st = getS(d.id);
+    if (curFilter === 'unread') { if (st !== 'unread') return false; }
+    else if (STATES.some(s => s.key === curFilter)) { if (st !== curFilter) return false; }
+    else {
+      const x = (C.extraChips || []).find(x => x.key === curFilter);
+      if (x) { if (!x.match(d)) return false; }
+      else if (gradeOf(d).key !== curFilter) return false;
+    }
   }
+  if (curCat && !catsOf(d).includes(curCat)) return false;
+  if (curQ && !C.searchHay(d).toLowerCase().includes(curQ.toLowerCase())) return false;
   return true;
 }
 
+// ─── URL state ──────────────────────────────────────────────────────────────
+let lastFocus = null, openCardId = '';
+function readHash() {
+  const h = new URLSearchParams(location.hash.slice(1));
+  return {
+    f: h.get('f') || 'all',
+    q: h.get('q') || '',
+    cat: h.get('cat') || h.get('domain') || '',
+    card: h.get('card') || '',
+  };
+}
+function writeHash() {
+  const h = new URLSearchParams();
+  if (curFilter !== 'all') h.set('f', curFilter);
+  if (curQ) h.set('q', curQ);
+  if (curCat) h.set('cat', curCat);
+  if (openCardId) h.set('card', openCardId);
+  const s = h.toString();
+  history.replaceState(null, '', s ? '#' + s : location.pathname + location.search);
+}
+
+// ─── Undo toast ─────────────────────────────────────────────────────────────
+let toastTimer = null, undoFn = null;
+function showToast(msg, onUndo) {
+  document.getElementById('toastMsg').textContent = msg;
+  undoFn = onUndo;
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 5000);
+}
+
+// ─── Chips / Stats ──────────────────────────────────────────────────────────
+function buildMainChips() {
+  const defs = [
+    { key: 'all', label: '全部' },
+    ...C.grades.map(g => ({ key: g.key, label: g.label })),
+    ...(C.extraChips || []).map(x => ({ key: x.key, label: x.label })),
+    { divider: true },
+    { key: 'unread', label: '待处理' },
+    ...STATES.map(s => ({ key: s.key, label: s.chip })),
+  ];
+  document.getElementById('mainChips').innerHTML = defs.map(d =>
+    d.divider ? '<span class="chip-divider"></span>'
+      : `<button class="fchip" data-f="${d.key}" aria-pressed="false">${d.label}</button>`
+  ).join('');
+  document.querySelectorAll('[data-f]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-f]').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-pressed', 'false'); });
+      btn.classList.add('active');
+      btn.setAttribute('aria-pressed', 'true');
+      curFilter = btn.dataset.f;
+      render();
+    });
+  });
+}
+
+function buildCatChips() {
+  const counts = {};
+  DATA.forEach(d => catsOf(d).forEach(c => { counts[c] = (counts[c] || 0) + 1; }));
+  const cats = Object.keys(counts)
+    .filter(c => counts[c] >= (C.minCatCount || 1))
+    .sort((a, b) => counts[b] - counts[a] || a.localeCompare(b));
+  const container = document.getElementById('catChips');
+  container.innerHTML = cats.map(c =>
+    `<button class="cat-chip" data-cat="${c}" aria-pressed="false">${c}</button>`
+  ).join('');
+  container.querySelectorAll('[data-cat]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const active = btn.classList.contains('active');
+      container.querySelectorAll('.cat-chip').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-pressed', 'false'); });
+      if (!active) { btn.classList.add('active'); btn.setAttribute('aria-pressed', 'true'); curCat = btn.dataset.cat; }
+      else { curCat = ''; }
+      render();
+    });
+  });
+}
+
+function buildStatsbar() {
+  const defs = [
+    ...C.grades.map(g => ({ key: g.key, label: g.label })),
+    ...(C.extraChips || []).map(x => ({ key: x.key, label: x.label })),
+    { key: 'unread', label: '待处理' },
+    ...STATES.map(s => ({ key: s.key, label: s.chip })),
+  ];
+  document.getElementById('statsbar').innerHTML =
+    `<span>共 <b data-stat="total">0</b> 条</span>` +
+    defs.map(d => `<span>${d.label} <b data-stat="${d.key}">0</b></span>`).join('') +
+    `<span class="stat-end">显示 <b data-stat="shown">0</b> 条</span>`;
+}
+
+function statCount(key) {
+  if (key === 'total') return DATA.length;
+  if (key === 'unread' || STATES.some(s => s.key === key)) return DATA.filter(d => getS(d.id) === key).length;
+  const x = (C.extraChips || []).find(x => x.key === key);
+  if (x) return DATA.filter(x.match).length;
+  return DATA.filter(d => gradeOf(d).key === key).length;
+}
+
+function updateStats() {
+  document.querySelectorAll('[data-stat]').forEach(el => {
+    if (el.dataset.stat !== 'shown') el.textContent = statCount(el.dataset.stat);
+  });
+  const hasTime = DATA.some(d => d.time);
+  const latest = DATA.map(d => hasTime ? `${d.date} ${d.time || ''}`.trim() : d.date)
+    .sort((a, b) => b.localeCompare(a))[0] || '';
+  document.getElementById('metaText').textContent =
+    latest ? `${hasTime ? '最后同步' : '最新批次'}：${latest}` : '暂无数据';
+}
+
 // ─── Render ─────────────────────────────────────────────────────────────────
+const dateFmt = new Intl.DateTimeFormat('zh-CN', { month: 'short', day: 'numeric', weekday: 'short' });
+const toLocalISO = dt => `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+
+function dateLabel(date, count) {
+  const today = toLocalISO(new Date());
+  const yesterday = toLocalISO(new Date(Date.now() - 86400000));
+  const day = date === today ? '今天 · ' : date === yesterday ? '昨天 · ' : '';
+  return `${day}${dateFmt.format(new Date(date + 'T00:00:00'))} · ${count} 条`;
+}
+
 function render() {
   updateStats();
+  writeHash();
   const wrap = document.getElementById('gridWrap');
+  const ae = document.activeElement;
+  const refocus = ae && wrap.contains(ae) ? { act: ae.dataset.act, id: ae.dataset.id, expand: ae.dataset.expand } : null;
   const filtered = DATA.filter(matches);
-  document.getElementById('sShown').textContent = filtered.length;
+  document.querySelector('[data-stat="shown"]').textContent = filtered.length;
 
   if (!filtered.length) {
     wrap.innerHTML = '<div class="empty">没有符合条件的条目</div>';
@@ -546,94 +2664,189 @@ function render() {
   }
 
   const byDate = {};
-  filtered.forEach(d => { (byDate[d.date]||(byDate[d.date]=[])).push(d); });
-  const dates = Object.keys(byDate).sort((a,b)=>b.localeCompare(a));
+  filtered.forEach(d => { (byDate[d.date] || (byDate[d.date] = [])).push(d); });
+  const dates = Object.keys(byDate).sort((a, b) => b.localeCompare(a));
+  const useTime = C.groupTime && filtered.some(d => d.time);
 
   wrap.innerHTML = dates.map(date => {
-    const label = date==='2026-03-22' ? '今天 · 2026年3月22日' : '昨天 · 2026年3月21日';
-    return `<div class="date-label">${label}</div>
-      <div class="grid">${byDate[date].map(cardHTML).join('')}</div>`;
+    const items = byDate[date];
+    const label = `<div class="date-label">${dateLabel(date, items.length)}</div>`;
+    if (!useTime) return label + `<div class="grid">${items.map(cardHTML).join('')}</div>`;
+    const byTime = {};
+    items.forEach(d => { (byTime[d.time || ''] || (byTime[d.time || ''] = [])).push(d); });
+    const times = Object.keys(byTime).sort((a, b) => b.localeCompare(a));
+    return label + times.map(time =>
+      `${time ? `<div class="time-label">${time} 采集</div>` : ''}<div class="grid">${byTime[time].map(cardHTML).join('')}</div>`
+    ).join('');
   }).join('');
 
-  // events
-  wrap.querySelectorAll('[data-act]').forEach(btn => {
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
-      const {id, act} = btn.dataset;
-      setS(id, getS(id)===act ? 'unread' : act);
-      render();
-    });
-  });
-  wrap.querySelectorAll('[data-expand]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const id = btn.dataset.expand;
-      const extra = document.getElementById('extra-'+id);
-      const arrow = btn.querySelector('.expand-arrow');
-      extra.classList.toggle('open');
-      arrow.classList.toggle('open');
-      btn.querySelector('.expand-label').textContent = extra.classList.contains('open') ? '收起' : '展开详情';
-    });
-  });
+  bindEvents(wrap);
+  if (refocus) {
+    const sel = refocus.act ? `[data-act="${refocus.act}"][data-id="${refocus.id}"]`
+              : refocus.expand ? `[data-expand="${refocus.expand}"]` : null;
+    const el = sel && wrap.querySelector(sel);
+    if (el) el.focus({ preventScroll: true });
+  }
 }
 
 function cardHTML(d) {
   const st = getS(d.id);
-  const gk = gradeKey(d.grade);
-  const gradeLabel = gk==='fire'?'🔥 必看':gk==='bolt'?'⚡ 值得看':'💡 备选';
-  const stCls = st==='watching'?' st-watching':st==='discussed'?' st-discussed':st==='dismissed'?' st-dismissed':'';
-  const tags = (d.tags||[]).map(t => {
-    const cls = t.includes('⭐')?'stars':t.includes('🆕')||t.includes('求职')||t.includes('新')?'new':'source';
-    return `<span class="ctag ${cls}">${t}</span>`;
-  }).join('');
-  const extraItems = (d.extra||[]).map(e=>`<li>${e}</li>`).join('');
-  const hasExtra = d.extra && d.extra.length > 0;
-
+  const g = gradeOf(d);
+  const stCls = STATES.some(s => s.key === st) ? ` st-${st}` : '';
+  const hasDetail = C.hasDetail(d);
+  const url = C.titleUrl(d);
+  const headRight = C.headRight(d);
   return `
-<div class="card grade-${gk}${stCls}" id="card-${d.id}">
+<div class="card grade-${g.key}${stCls}${hasDetail ? ' card--link' : ''}" id="card-${d.id}">
   <div class="card-body">
-    <div style="display:flex;align-items:center;justify-content:space-between"><div class="grade-badge ${gk}">${gradeLabel}</div><span style="font-size:11px;color:#484f58;font-family:monospace">#${String(DATA.indexOf(d)+1).padStart(3,'0')}</span></div>
-    <a class="card-title" href="${d.url}" target="_blank" rel="noopener">${d.title}</a>
-    <div class="card-desc">${d.desc}</div>
-    ${d.why ? `<div class="card-why"><div class="card-why-label">为什么推给你</div>${d.why}</div>` : ''}
-    ${tags ? `<div class="card-tags">${tags}</div>` : ''}
-    ${hasExtra ? `<button class="expand-btn" data-expand="${d.id}">
-      <span class="expand-arrow">▶</span>
-      <span class="expand-label">展开详情</span>
-    </button>` : ''}
+    <div class="card-head">
+      <div class="card-head-left">${C.headLeft(d)}<div class="grade-badge ${g.key}">${g.label}</div>${C.headBadges(d)}</div>
+      ${headRight ? `<span class="card-time">${headRight}</span>` : ''}
+    </div>
+    ${url ? `<a class="card-title" href="${url}" target="_blank" rel="noopener">${d.title}</a>` : `<span class="card-title">${d.title}</span>`}
+    <div class="card-desc">${C.desc(d) || ''}</div>
+    ${C.cardSections(d)}
+    ${C.tagsHTML(d)}
+    ${hasDetail ? `<button class="card-expand-toggle" data-expand="${d.id}" aria-haspopup="dialog">查看分析 →</button>` : ''}
   </div>
-  ${hasExtra ? `<div class="card-extra" id="extra-${d.id}"><ul>${extraItems}</ul></div>` : ''}
   <div class="card-actions">
-    <button class="action-btn${st==='watching'?' on-watch':''}" data-act="watching" data-id="${d.id}">👀 关注</button>
-    <button class="action-btn${st==='discussed'?' on-discuss':''}" data-act="discussed" data-id="${d.id}">💬 讨论中</button>
-    <button class="action-btn${st==='dismissed'?' on-dismiss':''}" data-act="dismissed" data-id="${d.id}">✕ 忽略</button>
-    <a class="card-link" href="${d.url}" target="_blank" rel="noopener">打开 ↗</a>
+    ${STATES.map(s => `<button class="action-btn${st === s.key ? ' ' + s.on : ''}" data-act="${s.key}" data-id="${d.id}">${s.action}</button>`).join('')}
+    ${url ? `<a class="card-link" href="${url}" target="_blank" rel="noopener">打开 ↗</a>` : ''}
   </div>
 </div>`;
 }
 
-function updateStats() {
-  document.getElementById('sTot').textContent = DATA.length;
-  document.getElementById('sUnread').textContent = DATA.filter(d=>getS(d.id)==='unread').length;
-  document.getElementById('sWatch').textContent = DATA.filter(d=>getS(d.id)==='watching').length;
-  document.getElementById('sDiscuss').textContent = DATA.filter(d=>getS(d.id)==='discussed').length;
-  document.getElementById('sDismiss').textContent = DATA.filter(d=>getS(d.id)==='dismissed').length;
-  document.getElementById('metaText').textContent = '最后更新：2026-03-22 14:00';
+function bindEvents(wrap) {
+  wrap.querySelectorAll('[data-act]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const { id, act } = btn.dataset;
+      const prev = getS(id);
+      const next = prev === act ? 'unread' : act;
+      const label = btn.textContent.trim();
+      setS(id, next);
+      render();
+      const d = DATA.find(x => x.id === id);
+      if (d && !matches(d)) {
+        const msg = next === 'unread' ? `已取消「${label}」标记，卡片移出当前视图` : `已标记「${label}」，卡片移出当前视图`;
+        showToast(msg, () => { setS(id, prev); render(); });
+      }
+    });
+  });
+  wrap.querySelectorAll('[data-expand]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const d = DATA.find(item => item.id === btn.dataset.expand);
+      if (d) openDrawer(d);
+    });
+  });
+  wrap.querySelectorAll('.card--link').forEach(card => {
+    card.addEventListener('click', e => {
+      if (e.target.closest('a, button')) return;
+      const d = DATA.find(item => 'card-' + item.id === card.id);
+      if (d) openDrawer(d);
+    });
+  });
 }
 
-document.querySelectorAll('[data-f]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('[data-f]').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    curFilter = btn.dataset.f;
-    render();
-  });
+// ─── Drawer ─────────────────────────────────────────────────────────────────
+function openDrawer(d) {
+  document.getElementById('drawerTitle').textContent = C.drawerTitle(d);
+  document.getElementById('drawerMeta').innerHTML = C.drawerMeta(d);
+  document.getElementById('drawerBody').innerHTML = C.drawerBody(d);
+  lastFocus = document.activeElement;
+  openCardId = C.deepLinkId(d);
+  writeHash();
+  document.getElementById('drawerPanel').classList.add('open');
+  document.getElementById('drawerBackdrop').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('drawerClose').focus();
+}
+
+function closeDrawer() {
+  if (!document.getElementById('drawerPanel').classList.contains('open')) return;
+  document.getElementById('drawerPanel').classList.remove('open');
+  document.getElementById('drawerBackdrop').classList.remove('open');
+  document.body.style.overflow = '';
+  openCardId = '';
+  writeHash();
+  if (lastFocus && document.contains(lastFocus)) lastFocus.focus();
+  lastFocus = null;
+}
+
+document.getElementById('drawerBackdrop').addEventListener('click', closeDrawer);
+document.getElementById('drawerClose').addEventListener('click', closeDrawer);
+document.addEventListener('keydown', e => {
+  const panel = document.getElementById('drawerPanel');
+  const searchEl = document.getElementById('searchInput');
+  if (e.key === 'Escape') {
+    if (panel.classList.contains('open')) { closeDrawer(); return; }
+    if (document.activeElement === searchEl && searchEl.value) { searchEl.value = ''; curQ = ''; render(); }
+    return;
+  }
+  if (e.key === '/' && !panel.classList.contains('open') && document.activeElement !== searchEl) {
+    e.preventDefault(); searchEl.focus(); return;
+  }
+  if (e.key === 'Tab' && panel.classList.contains('open')) {
+    const f = panel.querySelectorAll('button, a[href], input, [tabindex]:not([tabindex="-1"])');
+    if (!f.length) return;
+    const first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
 });
+
+// ─── Global events ──────────────────────────────────────────────────────────
 document.getElementById('searchInput').addEventListener('input', e => {
   curQ = e.target.value;
   render();
 });
+document.getElementById('toastUndo').addEventListener('click', () => {
+  if (undoFn) undoFn();
+  undoFn = null;
+  clearTimeout(toastTimer);
+  document.getElementById('toast').classList.remove('show');
+});
+window.addEventListener('storage', e => {
+  if (e.key === SK) { S = JSON.parse(e.newValue || '{}'); render(); }
+});
 
+// ─── Init（含 URL 状态恢复）──────────────────────────────────────────────────
+document.getElementById('productBadge').textContent = C.badge;
+document.getElementById('boardTitle').textContent = C.title;
+document.getElementById('boardSubtitle').textContent = C.subtitle;
+document.getElementById('searchInput').placeholder = C.searchPlaceholder;
+
+buildMainChips();
+buildCatChips();
+buildStatsbar();
+
+const initState = readHash();
+if ([...document.querySelectorAll('[data-f]')].some(b => b.dataset.f === initState.f)) curFilter = initState.f;
+curQ = initState.q;
+document.getElementById('searchInput').value = curQ;
+document.querySelectorAll('[data-f]').forEach(b => {
+  const on = b.dataset.f === curFilter;
+  b.classList.toggle('active', on);
+  b.setAttribute('aria-pressed', String(on));
+});
+if (initState.cat) {
+  const cbtn = [...document.querySelectorAll('.cat-chip')].find(b => b.dataset.cat === initState.cat);
+  if (cbtn) { cbtn.classList.add('active'); cbtn.setAttribute('aria-pressed', 'true'); curCat = initState.cat; }
+}
+
+document.body.classList.add('anim-on');
 render();
+setTimeout(() => document.body.classList.remove('anim-on'), 800);
+
+if (initState.card) {
+  const d0 = DATA.find(x => C.deepLinkId(x) === initState.card || x.id === initState.card);
+  if (d0) {
+    const el = document.getElementById('card-' + d0.id);
+    if (el) { el.scrollIntoView({ block: 'center' }); el.classList.add('card-flash'); }
+    if (C.hasDetail(d0)) openDrawer(d0);
+  }
+}
 </script>
 </body>
 </html>
