@@ -162,14 +162,43 @@ body[data-product="pulse"] .product-badge {
 .cat-chip:hover { border-color: var(--text-3); color: var(--text-2); }
 .cat-chip.active { background: rgba(88,166,255,.12); border-color: rgba(88,166,255,.4); color: #58a6ff; font-weight: 600; }
 #catChips {
-  flex-wrap: nowrap;
-  overflow-x: auto;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
   scrollbar-width: none;
-  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 32px), transparent);
-  mask-image: linear-gradient(90deg, #000 calc(100% - 32px), transparent);
 }
 #catChips::-webkit-scrollbar { display: none; }
 #catChips .cat-chip { flex-shrink: 0; }
+.category-filter {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+}
+.cat-chips.is-collapsed {
+  max-height: 27px;
+  -webkit-mask-image: linear-gradient(180deg, #000 62%, transparent);
+  mask-image: linear-gradient(180deg, #000 62%, transparent);
+}
+.cat-chips.is-expanded {
+  max-height: min(28vh, 220px);
+  overflow-y: auto;
+  padding-bottom: 2px;
+}
+.cat-toggle {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border-radius: 14px;
+  border: 1px solid var(--border-bright);
+  background: var(--surface-inset);
+  color: var(--text-2);
+  font-size: 11px;
+  cursor: pointer;
+  transition: border-color .15s, color .15s, background .15s;
+  white-space: nowrap;
+}
+.cat-toggle:hover { border-color: var(--text-3); color: var(--text); }
+.cat-toggle[hidden] { display: none; }
 .search {
   margin-left: auto;
   padding: 6px 12px;
@@ -723,6 +752,16 @@ a.card-title:hover { color: #fff; text-decoration: underline; text-underline-off
   }
   .chips-row::-webkit-scrollbar { display: none; }
   .fchip, .cat-chip { padding: 4px 10px; font-size: 12px; flex-shrink: 0; }
+  .category-filter { display: block; }
+  .cat-toggle { display: none; }
+  #catChips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-height: none;
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+    mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+  }
 
   .grid-wrap { padding: 14px 12px; }
   .grid { grid-template-columns: 1fr; gap: 10px; }
@@ -746,7 +785,10 @@ a.card-title:hover { color: #fff; text-decoration: underline; text-underline-off
 <div class="filter-bar">
   <div class="filter-row">
     <div class="chips-row" id="mainChips"></div>
-    <div class="chips-row" id="catChips"></div>
+    <div class="category-filter">
+      <div class="chips-row cat-chips is-collapsed" id="catChips"></div>
+      <button class="cat-toggle" id="catToggle" type="button" aria-expanded="false" hidden>展开标签</button>
+    </div>
   </div>
   <input class="search" id="searchInput" type="text">
 </div>
@@ -835,6 +877,1446 @@ const BOARD_CONFIG = {
 
 // ─── Data ───────────────────────────────────────────────────────────────────
 const DATA = [
+  {
+    "id": "p7cb9eea10c",
+    "date": "2026-06-21",
+    "round": 0,
+    "grade": "🔥",
+    "title": "nexu-io/html-anything (7,044⭐)",
+    "desc": "本地 agentic HTML editor：Claude Code / Cursor / Codex / Gemini / Copilot / OpenCode / Qwen / Aider 这些已登录 CLI 直接驱动，把 Markdown/CSV/JSON/SQL/原始笔记变成可发布 HTML；内置 75 个 skill、9 种交付面（文章、deck、poster、小红书卡片、tweet card、prototype、data report、Hyperframes 视频帧），还支持 WeChat/X/Zhihu/PNG/HTML 导出。",
+    "why": "不是“AI 零代码建站”，而是把 agent 输出的最终形态从 Markdown 推到 HTML artifact。贴 OpenClaw 的 dashboard/canvas/skill 体系：Skill.md + 设计系统 + sandboxed preview + export pipeline 很值得拆。Apache-2.0；真实试用前仍建议先看它如何调用本地 CLI。[官方替代风险: 低-中]",
+    "url": "https://github.com/nexu-io/html-anything",
+    "tags": [
+      "GitHub",
+      "7,044⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p0be1fc8519",
+    "date": "2026-06-21",
+    "round": 0,
+    "grade": "⚡",
+    "title": "standardagents/arrow-js (3,668⭐)",
+    "desc": "“给 coding agent 更容易写对的 UI framework”：用 JS modules、template literals、DOM primitives 做极小 reactive runtime；同时有 SSR/hydrate、Vite plugin，以及 QuickJS/WASM sandbox runtime，让 agent 生成的 UI 代码能在隔离 realm 执行但渲染到真实 DOM。",
+    "why": "适合当 OpenClaw canvas / HTML artifact 的技术路线参考：与其让 agent 写一坨 React 状态管理，不如给它更小、更接近 DOM 的约束面。风险是生态远弱于 React，不建议主项目迁移；但“agent-friendly UI primitive + sandbox execution”这个方向值得看。MIT。[官方替代风险: 中]",
+    "url": "https://github.com/standardagents/arrow-js",
+    "tags": [
+      "GitHub",
+      "3,668⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p90eb0b46c4",
+    "date": "2026-06-21",
+    "round": 0,
+    "grade": "⚡",
+    "title": "V2EX：Vibe Coding 了两年，分享一下我对于 Vibe 的感想",
+    "desc": "热帖：一个高中生视角吐槽/复盘 Vibe Coding 圈层，把“真正在干活的人”“拿 AI 学习的人”“烧 token 展示优越感的人”“先写设计/骨架再让 AI 填空的人”分得很直白。",
+    "why": "有社区观察价值。Alex 不缺 AI coding 技术，但需要持续校准“什么是真有效率、什么只是 token 表演”。里面“强者先写设计文档/架构/关键空函数，AI 负责填空”这段，和 OpenClaw/CC 工作流很贴。",
+    "url": "https://www.v2ex.com/t/1221657",
+    "tags": [
+      "V2EX",
+      "CC工作流"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p0dcc40dfeb",
+    "date": "2026-06-21",
+    "round": 0,
+    "grade": "💡",
+    "title": "LINUX DO：[成果墙] 用 AI 手搓过哪些只有自己会用但离不开的东西？",
+    "desc": "82 回复 / 233 likes：中文社区收集个人用 AI 搓出来的窄需求工具，重点不是宏大产品，而是“只有自己会用，但离不开”。",
+    "why": "适合当 Radar 的需求池：Alex 现在最缺的不是再学一个框架，而是能做成作品/面试素材/个人效率工具的真实窄场景。注意 linux.do 直链 curl 返回 403，但 opencli feed 已拿到结构化摘要；不绕过 Cloudflare。",
+    "url": "https://linux.do/t/topic/2439776",
+    "tags": [
+      "LINUX DO",
+      "终端工具"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pe0fb1845ef",
+    "date": "2026-06-21",
+    "round": 0,
+    "grade": "🔥",
+    "title": "rivet-dev/sandbox-agent (1,440⭐)",
+    "desc": "把 Claude Code / Codex / OpenCode / Cursor / Amp / Pi 这类 coding agent 放进 sandbox 后，用一个 HTTP/SSE API 统一远程控制：创建 session、发消息、流式事件、权限处理、Inspector UI、OpenAPI schema，事件还能落到 Postgres/ClickHouse/Rivet 做 replay/audit。",
+    "why": "贴 OpenClaw subagent / remote session / sandbox 控制层：不是又一个 agent，而是“sandbox 内 agent daemon + 外部统一控制协议”。对 OpenClaw 最值得看的是 universal session schema、TTY/permission/streaming 的 HTTP 化、Inspector、以及把 agent transcript 外流存储做审计。真实试用前注意 quickstart 有 `curl | sh`，先审脚本。[官方替代风险: 低-中]",
+    "url": "https://github.com/rivet-dev/sandbox-agent",
+    "tags": [
+      "GitHub",
+      "1,440⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pcb136735b7",
+    "date": "2026-06-21",
+    "round": 0,
+    "grade": "🔥",
+    "title": "superagent-ai/vibekit (1,799⭐)",
+    "desc": "本地优先的 coding agent safety layer：Claude Code/Gemini/Codex 等 agent 在隔离 Docker sandbox 里跑，带 secrets/API key redaction、实时 logs/traces/metrics、离线可用，也有 SDK 可嵌进自己的应用。",
+    "why": "最近几轮一直在推 sandbox / guard / context firewall，这个更像“个人开发者可直接套在 agent 前面的安全外壳”。对 OpenClaw 的参考点是 redaction + observability + local sandbox 的组合：不是只挡危险命令，还要让你知道 agent 到底做了什么。[官方替代风险: 低-中]",
+    "url": "https://github.com/superagent-ai/vibekit",
+    "tags": [
+      "GitHub",
+      "1,799⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p436e56d2dc",
+    "date": "2026-06-21",
+    "round": 0,
+    "grade": "⚡",
+    "title": "omnigent-ai/omnigent (4,207⭐)",
+    "desc": "开源 agent meta-harness：统一编排 Claude Code、Codex、Cursor、Pi、自定义 YAML agent；支持手机/浏览器继续 session、多 agent 协作、cloud sandbox、team share/fork/co-drive，以及 server/agent/session 三级 policy。",
+    "why": "和 OpenClaw 产品形态很近，尤其是“手机继续 session + sub-agent/team collaboration + policy stack”。但也因为太近，建议先当竞品/架构样本看，不建议主环境一键装；重点看它如何把 agent、host、server、policy、team sharing 这几块组织成产品。[官方替代风险: 中]",
+    "url": "https://github.com/omnigent-ai/omnigent",
+    "tags": [
+      "GitHub",
+      "4,207⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p186ed19d50",
+    "date": "2026-06-21",
+    "round": 0,
+    "grade": "💡",
+    "title": "LINUX DO：OpenAI Codex 日志写入异常，社区反映或严重损耗 SSD 寿命",
+    "desc": "52 回复 / 106 likes：中文社区在讨论 Codex 日志异常写入导致 SSD 写入量暴涨的风险。",
+    "why": "不是新工具，是“agent harness 运行成本”的提醒：长期驻留/自循环/多 agent 并发时，日志、trace、event replay 如果没做限流、轮转、压缩和采样，会从 token 成本问题变成磁盘寿命问题。OpenClaw 后续做 session replay/board/audit 时也要留意。",
+    "url": "https://linux.do/t/topic/2438231",
+    "tags": [
+      "LINUX DO",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "peb09d438da",
+    "date": "2026-06-21",
+    "round": 0,
+    "grade": "💡",
+    "title": "HN：make-look-scanned (112⭐)",
+    "desc": "HN 95pt / 47 comments：一个把 PDF 做成真实扫描件质感的 CLI + WASM 浏览器工具，skew、纸张色、噪声、边缘阴影、JPEG artifact 都可调；浏览器端本地处理，不用把文件上传到在线工具。",
+    "why": "纯 Radar 小工具，但很实用：隐私友好、本地优先、CLI/WASM 双形态。适合放进“个人工具箱”而不是主线项目；许可证 AGPL，分发二进制要注意源码义务。[官方替代风险: 低]",
+    "url": "https://github.com/overflowy/make-look-scanned",
+    "tags": [
+      "GitHub",
+      "112⭐",
+      "终端工具"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pa913354435",
+    "date": "2026-06-20",
+    "round": 0,
+    "grade": "🔥",
+    "title": "mksglu/context-mode (17,822⭐)",
+    "desc": "给 AI coding agent 做“上下文节流 + 会话连续性”的 MCP/插件层：把 Playwright snapshot、GitHub issues、日志等大输出留在 sandbox/SQLite/FTS5 里，只把摘要和检索结果喂回上下文；支持 Claude Code、Codex、OpenCode、Cursor、Gemini CLI、OpenClaw/Pi 等 15+ 平台，还能在 compaction 后恢复任务、文件、错误、git 操作和用户决策。",
+    "why": "贴 OpenClaw 长会话/多工具调用的核心痛点：不是再扩 context，而是把“工具输出不要污染对话上下文”做成基础设施。对 OpenClaw 最有参考价值的是 sandbox tools、FTS5/BM25 检索、PreCompact/SessionStart resume snapshot、以及 OpenClaw gateway plugin 适配。真实接入前注意许可证是 ELv2/Other，不适合无脑内嵌。[官方替代风险: 低-中]",
+    "url": "https://github.com/mksglu/context-mode",
+    "tags": [
+      "GitHub",
+      "17,822⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p61897feef6",
+    "date": "2026-06-20",
+    "round": 0,
+    "grade": "🔥",
+    "title": "cisco-ai-defense/skill-scanner (2,217⭐)",
+    "desc": "Cisco AI Defense 出的 Agent Skills 安全扫描器：面向 Codex/Cursor skills，也能 lenient 扫 Claude Code `.claude/commands` 和普通 markdown skill；结合 YAML/YARA 静态规则、bytecode、shell pipeline taint、Python behavioral dataflow、LLM-as-judge、VirusTotal/Cisco AI Defense，可输出 SARIF/HTML，能进 pre-commit 和 GitHub Actions。",
+    "why": "昨天推过 Cisco mcp-scanner，这个是 skills 侧补位，正好对应 ClawHub/Skill Workshop：第三方 skill 入库前不该只看 README，要扫 prompt injection、数据外传、恶意命令、触发条件过宽、跨 skill overlap。它自己也明确“无发现不等于安全”，这点适合写进 OpenClaw skill 安全边界。[官方替代风险: 低]",
+    "url": "https://github.com/cisco-ai-defense/skill-scanner",
+    "tags": [
+      "GitHub",
+      "2,217⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pee865156b7",
+    "date": "2026-06-20",
+    "round": 0,
+    "grade": "⚡",
+    "title": "hashgraph-online/hol-guard (362⭐)",
+    "desc": "“AI antivirus for developer agents”：在 Codex/Claude Code/Cursor/Gemini/OpenCode/Pi 等 harness 前面做本地 Guard，启动前记录 baseline，工具执行前拦截，发现新/变更的 MCP、skills、plugins、危险命令、secret/exfil 时走本地 approval center，并留 receipts。",
+    "why": "不是单纯 scanner，而是“运行时守门 + 审批中心 + receipts”的产品形态。OpenClaw 现在已有 approval/native approvals，但 HOL Guard 的 baseline→changed artifact→pause→approve→receipt 链路很像 ClawHub/第三方插件信任模型可以借鉴的交互设计。[官方替代风险: 低-中]",
+    "url": "https://github.com/hashgraph-online/hol-guard",
+    "tags": [
+      "GitHub",
+      "362⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pe484317acc",
+    "date": "2026-06-20",
+    "round": 0,
+    "grade": "💡",
+    "title": "HN：CSSQuake",
+    "desc": "HN 125pt / 24 comments：一个纯 CSS/浏览器里的 Quake-ish 实验项目，没什么工程落地，但“网页前端边界玩具”够 Radar。",
+    "why": "纯好玩项。和 Agent 主线关系不大，但适合当 dashboard/canvas 方向的创意刺激：前端不是只能做表单和仪表盘，也能把 CSS 当渲染引擎玩。",
+    "url": "https://cssquake.com/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pbe6c601aa9",
+    "date": "2026-06-20",
+    "round": 0,
+    "grade": "🔥",
+    "title": "millionco/expect (3,506⭐)",
+    "desc": "给 Claude Code/Codex/Cursor 等 coding agent 用的真实浏览器 QA skill：读取 git changes，自动生成 test plan，用 Playwright 跑真实浏览器，检查性能、CSRF/依赖安全、hover/link/button、metadata、dead links；可本地跑，也支持 CI/headless/GitHub Action。",
+    "why": "比上午的 vibetest-use 更贴“AI coding 后验收瓶颈”：不是让 agent 看截图点坐标，而是把 DOM/Playwright/真实 cookies/代码 diff 串成 QA loop。对 OpenClaw dashboard、canvas、前端工作流都有参考价值；真实试用前注意它的 quickstart 是让 agent fetch init script，先看脚本再跑。[官方替代风险: 中]",
+    "url": "https://github.com/millionco/expect",
+    "tags": [
+      "GitHub",
+      "3,506⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p14bb06e38b",
+    "date": "2026-06-20",
+    "round": 0,
+    "grade": "🔥",
+    "title": "mattpocock/sandcastle (6,200⭐)",
+    "desc": "TypeScript 版 sandboxed coding-agent orchestrator：一个 `sandcastle.run()` 把 Claude Code/Codex 等 agent 放进 Docker/Podman/Vercel sandbox，自动建 worktree/branch、收集 commits、支持 implement→review、多 agent parallel planner、结构化输出、completion signal、日志和恢复。",
+    "why": "这很像 OpenClaw subagent/session 的“工程化外骨骼”：把 AFK agent、分支隔离、sandbox、review pipeline、merge-to-head 做成 library，而不是只靠聊天入口。尤其值得看它的 branchStrategy、warm sandbox、structured output、hanging process completion timeout 设计。[官方替代风险: 低-中]",
+    "url": "https://github.com/mattpocock/sandcastle",
+    "tags": [
+      "GitHub",
+      "6,200⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p0f095e2c65",
+    "date": "2026-06-20",
+    "round": 0,
+    "grade": "⚡",
+    "title": "V2EX：问一个直击灵魂的问题，你用 AI 做了哪些有意义的工具？",
+    "desc": "39 回复：中文开发者在讨论“AI coding 普及后，个人到底还能做什么有意义的产品”，不是零代码炫技，而是缺想法、缺行动、为少数人需求做产品的焦虑。",
+    "why": "这条和 Radar 的定位很贴：Alex 不缺 AI coding 能力，缺的是“值得做的窄需求”和产品感。建议当成中文社区需求池看评论，不当技术帖看。",
+    "url": "https://www.v2ex.com/t/1221614",
+    "tags": [
+      "V2EX"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p0d543b78b5",
+    "date": "2026-06-20",
+    "round": 0,
+    "grade": "💡",
+    "title": "HN：I Stored a Website in a Favicon",
+    "desc": "作者把 208 bytes 的 HTML payload 写进 favicon 像素 RGB，再用 canvas 解码渲染；没什么实用性，但边界感很强。",
+    "why": "纯 Radar 好玩项：favicon 也能被当 storage。对 dashboard/可视化没直接用，但这种“把无聊资源当载体”的思路适合做创意触发。",
+    "url": "https://www.timwehrle.de/blog/i-stored-a-website-in-a-favicon/",
+    "tags": [],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pe8828de1db",
+    "date": "2026-06-20",
+    "round": 0,
+    "grade": "🔥",
+    "title": "always-further/nono (2,740⭐)",
+    "desc": "Sigstore 团队做的 agent sandbox：不用 Docker/VM/daemon，直接把 Claude Code/Codex/OpenCode/OpenClaw 等 agent 限在当前目录，SSH keys、cloud credentials、其他磁盘默认不可见；还提到 profile registry、网络 allowlist、credentials injection、L7 filtering、rollback、audit、supply-chain security",
+    "why": "OpenClaw/ClawHub 第三方 skill/MCP 执行安全线；最近连续推到 MCP scanner、agent-scan、豆包 sandbox、Codex 删系统、伪 reCAPTCHA 粘贴命令，nono 是“运行时默认关门”的正向样本。适合观摩 profile/policy/registry 设计，不建议直接替换现有 OpenClaw sandbox。[官方替代风险: 低]",
+    "url": "https://github.com/always-further/nono",
+    "tags": [
+      "GitHub",
+      "2,740⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p17c38eb7ac",
+    "date": "2026-06-20",
+    "round": 0,
+    "grade": "⚡",
+    "title": "onecli/onecli (2,398⭐)",
+    "desc": "给 AI agents 用的 credential gateway + vault：agent 只拿 `FAKE_KEY`，HTTP 请求经过本地 gateway 时再按 host/path 注入真实凭证；支持 AES-256-GCM 加密、多 agent token、Dashboard、Bitwarden/Vault 集成",
+    "why": "OpenClaw 现在最容易出事的不是“能不能调 API”，而是工具和子 agent 到底能不能看到真实 key。OneCLI 的思路可以参考成 OpenClaw 的 secret broker：agent 用占位凭证，gateway 负责注入、审计、轮换和权限分离。缺点是 quickstart 是 `curl | sh`，真实试用前必须单独审计。[官方替代风险: 低-中]",
+    "url": "https://github.com/onecli/onecli",
+    "tags": [
+      "GitHub",
+      "2,398⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pb91f090c8c",
+    "date": "2026-06-20",
+    "round": 0,
+    "grade": "⚡",
+    "title": "tirth8205/code-review-graph (18,705⭐)",
+    "desc": "本地优先 code intelligence graph：Tree-sitter + SQLite 持久化代码图，给 MCP/CLI 提供 blast-radius、risk-scored PR review、test gap、architecture overview、interactive graph、multi-repo daemon；README 明确说核心图存储无需外部 DB/云服务，embedding 可选",
+    "why": "这几天 code context 赛道连续出现 axon/SocratiCode/claude-context，这个更偏“代码评审/变更风险”产品化：`detect-changes --brief` 直接显示 token savings + affected flows/test gaps。对 OpenClaw 最有参考价值的是“改前 blast radius + 改后 sticky PR comment”，比单纯 semantic search 更不容易被官方完全吃掉。[官方替代风险: 中]",
+    "url": "https://github.com/tirth8205/code-review-graph",
+    "tags": [
+      "GitHub",
+      "18,705⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pe827072d7d",
+    "date": "2026-06-20",
+    "round": 0,
+    "grade": "💡",
+    "title": "Show HN: Talos (104⭐)",
+    "desc": "YC 团队开源 Lean 写的 WebAssembly interpreter，用同一套定义既执行 Wasm，又做 formal reasoning；目标是以后对 Rust/C/Go 等能编译到 Wasm 的代码证明性质",
+    "why": "不是直接可用工具，更像趋势样本：AI coding 让生成代码变便宜后，“验证”开始变成瓶颈。Talos 现在还 WIP/AGPL/Lean 门槛高，但它把“AI 写代码 → Wasm → 形式化验证”这条线讲得很清楚，适合放在 agent 安全/可信执行长期观察里。",
+    "url": "https://github.com/cajal-technologies/talos",
+    "tags": [
+      "GitHub",
+      "104⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p74b3e847a8",
+    "date": "2026-06-20",
+    "round": 0,
+    "grade": "🔥",
+    "title": "giancarloerra/SocratiCode (3,017⭐)",
+    "desc": "本地优先 codebase intelligence：MCP/Claude Code plugin/VS Code/Cursor 都能接，自动 Docker/Qdrant，本地索引代码、infra/API/DB 文档，做 hybrid semantic + BM25、dependency graph、symbol-level impact analysis、call-flow、HTML graph viewer；README 明确说在 VS Code 2.45M LOC benchmark 里少 61% context、少 84% tool calls、快 37x",
+    "why": "OpenClaw code context / agent 改代码安全线；昨天推 axon，今天这个更像“完整产品化版本”：zero-config、本地、跨 host、impact analysis + graph viewer + infra artifact。可观摩它如何把代码理解做成 agent-native 基础设施，不建议直接在主环境一键装；AGPL + Docker/Qdrant 需要单独评估。[官方替代风险: 中]",
+    "url": "https://github.com/giancarloerra/SocratiCode",
+    "tags": [
+      "GitHub",
+      "3,017⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p8339ecddac",
+    "date": "2026-06-20",
+    "round": 0,
+    "grade": "⚡",
+    "title": "zilliztech/claude-context (11,897⭐)",
+    "desc": "Claude Code 的 semantic code search MCP/VS Code extension：把整个代码库放进向量库，让 Claude 不用多轮 grep 就能拿到相关上下文；支持 MCP、VS Code、OpenAI Codex CLI 等",
+    "why": "同属 code context 赛道，但它的边界更窄：semantic search + vector DB。价值是作为 OpenClaw read/memory_search 的“最小可用对照组”；缺点是默认要 Zilliz Cloud + OpenAI embedding key，本地/隐私友好弱于 SocratiCode。[官方替代风险: 高-中]",
+    "url": "https://github.com/zilliztech/claude-context",
+    "tags": [
+      "GitHub",
+      "11,897⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p37d1e6dda3",
+    "date": "2026-06-20",
+    "round": 0,
+    "grade": "⚡",
+    "title": "V2EX：一个 reCAPTCHA 把我骗到重装系统",
+    "desc": "27 回复：用户点到伪 reCAPTCHA，页面把 base64 命令塞进剪贴板，引导打开终端粘贴执行；命令下载脚本、伪装 softwareupdate、清 history，最后只能断网重装系统",
+    "why": "这条和前几天 GitHub 木马仓库/MCP 安全是一条线：现在“复制命令安装工具”的肌肉记忆已经是攻击面。OpenClaw/ClawHub 后面做 skill 安装、MCP marketplace、README 一键安装时，必须把命令展示、来源信誉、危险行为提示、sandbox 和审计做成硬门槛。",
+    "url": "https://www.v2ex.com/t/1221581",
+    "tags": [
+      "V2EX",
+      "MCP",
+      "Skills"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pe31ea93101",
+    "date": "2026-06-20",
+    "round": 0,
+    "grade": "💡",
+    "title": "browser-use/vibetest-use (804⭐)",
+    "desc": "Browser-Use agents 做 vibe-coded 网站 QA 的 MCP：给 Claude Code/Cursor 一个 `vibetest` server，可用多个 browser-use agent 检查 UI bug、broken links、accessibility、localhost/live site",
+    "why": "昨天推 TesterArmy SaaS，今天这个是更轻的开源 MCP 版本；适合观摩“AI coding 后用 agent 反向测前端”的接口设计。现在还很早期，依赖 Google API key + Playwright，不建议直接主线接入。[官方替代风险: 中]",
+    "url": "https://github.com/browser-use/vibetest-use",
+    "tags": [
+      "GitHub",
+      "804⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p03fd61fcb7",
+    "date": "2026-06-20",
+    "round": 0,
+    "grade": "💡",
+    "title": "Show HN: Metiq",
+    "desc": "HN 82pt / 23 comments：实时 3D globe，把 ships、aircraft、satellites、ports、weather、hazards、infrastructure、cyber、politics 等 100+ public datasets 按经纬度/高度统一展示",
+    "why": "不是 Agent 主线，但很 Radar：把碎片化公开数据源做成“可探索的 3D 世界状态面板”，对 Radar Board / dashboard 可视化有启发。",
+    "url": "https://metiq.space",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p2f74c3bec9",
+    "date": "2026-06-19",
+    "round": 0,
+    "grade": "🔥",
+    "title": "harshkedia177/axon (713⭐)",
+    "desc": "本地代码 knowledge graph + MCP：用 tree-sitter 把 Python/TS/JS 代码库索引成调用图、类型关系、执行流、社区聚类、dead code、git change coupling，给 Claude Code/Cursor 直接查 `impact/context/dead-code/diff`",
+    "why": "OpenClaw code context / agent 改代码安全线；不是再做 grep/RAG，而是把“改这个 symbol 会炸哪里”预计算成 agent 可用工具。对 Alex 最有用的是 impact analysis + structural diff，可以作为 OpenClaw read/memory_search 之外的代码结构层参考；[官方替代风险: 中（Claude/Cursor 会增强代码理解，但本地 graph + MCP + 可视化 + 离线索引仍有独立价值）]",
+    "url": "https://github.com/harshkedia177/axon",
+    "tags": [
+      "GitHub",
+      "713⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p5dc01d82a5",
+    "date": "2026-06-19",
+    "round": 0,
+    "grade": "⚡",
+    "title": "HN：I found 10k GitHub repositories distributing Trojan malware",
+    "desc": "HN 766pt / 195 comments：作者发现约 10,000 个不同账号/不同 repo 名的 GitHub 仓库在分发木马，模式是“看似正常项目 + release/下载入口投毒”",
+    "why": "和这两天 MCP/skills 安全线直接连上：ClawHub/skills marketplace 如果只看 GitHub star/name/README 很危险，必须做来源信誉、release artifact、安装命令、权限边界和复现构建检查。",
+    "url": "https://orchidfiles.com/github-repositories-distributing-malware/",
+    "tags": [
+      "MCP",
+      "Skills",
+      "安全"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p73669d511c",
+    "date": "2026-06-19",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Launch HN: TesterArmy (YC P26)",
+    "desc": "agentic testing platform：用自然语言定义 E2E 测试，让 agent 在部署前和生产中跑 Web/mobile 检查；HN 文本里提到已被 30+ team 日常使用，抓到 onboarding、checkout、AI chat tool-calling regression",
+    "why": "OpenClaw dashboard / nodes / 多 agent 回归测试；重点不是买 SaaS，而是“AI coding 之后测试成为瓶颈”这个产品切面很准：以后 OpenClaw 的 agent workflow 也需要自然语言 smoke test + schedule + alert，而不是只靠人工点。",
+    "url": "https://tester.army",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p48237ce6c0",
+    "date": "2026-06-19",
+    "round": 0,
+    "grade": "💡",
+    "title": "NativeScript/SimDeck (125⭐)",
+    "desc": "给 agent 操控 iOS Simulator / Android emulator 的开发工具：H.264 streaming、accessibility tree describe、tap/gesture/type、性能采样、截图录屏、React Native/Flutter/NativeScript inspector，还能装 Codex skill",
+    "why": "星数刚过门槛但方向很新：它把“移动端模拟器”做成 agent 可读/可控环境，和 OpenClaw node/canvas/mobile 自动化有参考价值；不建议现在接入主线，先观摩 CLI/API 设计。[官方替代风险: 低-中]",
+    "url": "https://github.com/NativeScript/SimDeck",
+    "tags": [
+      "GitHub",
+      "125⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p055d6068ee",
+    "date": "2026-06-19",
+    "round": 0,
+    "grade": "💡",
+    "title": "LINUX DO：Claude Code 等 agent vibe coding 工作流分享",
+    "desc": "34 回复 / 115 likes：中文社区分享一套 2026/6/18 的 Claude Code/agent coding 工作流",
+    "why": "内容未二次抓详情页，只基于 opencli feed + 链接 200 校验；它适合作为“中文用户实际怎么配 CC/agent 工作流”的样本，不按工具推荐，按社区实践信号留着看。",
+    "url": "https://linux.do/t/topic/2430684",
+    "tags": [
+      "LINUX DO",
+      "Agent",
+      "CC工作流"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pf58d51acf2",
+    "date": "2026-06-19",
+    "round": 0,
+    "grade": "🔥",
+    "title": "affaan-m/ECC (217,816⭐)",
+    "desc": "“Agent Harness Operating System”：把 Claude Code / Codex / Cursor / OpenCode / Gemini 的 skills、agents、hooks、rules、memory、security scan 和 cross-harness workflow 收成一套可安装体系；README 里还有明确的低上下文/no-hooks、安全安装和 uninstall 边界",
+    "why": "贴 OpenClaw/ClawHub/skills marketplace 主线；重点不是直接装，而是参考它如何把 skills、rules、hooks、session memory、security scan、插件市场和收费 GitHub App 放成一个“agent harness 产品面”。星数异常高但已用 `gh repo view` 验证；仍建议先观摩结构，不在主环境一键安装；[官方替代风险: 中（Claude Code 官方 plugin/skill 会吃掉部分能力，但跨 harness/安装治理/安全审计仍有独立空间）]",
+    "url": "https://github.com/affaan-m/ECC",
+    "tags": [
+      "GitHub",
+      "217,816⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pb27024af22",
+    "date": "2026-06-19",
+    "round": 0,
+    "grade": "⚡",
+    "title": "0x4m4/hexstrike-ai (9,733⭐)",
+    "desc": "把 150+ 安全工具和 12+ AI agents 包成 MCP cybersecurity automation 平台，可接 Claude/GPT/Copilot 做授权渗透测试、CTF、漏洞发现和报告",
+    "why": "不建议在主环境运行；价值是给 OpenClaw 第三方 MCP/skill 安全边界做“反面压力测试样本”：一个 MCP 一旦能调 nmap/nuclei/sqlmap/browser/OSINT 工具，权限提示、sandbox、allowlist、审计日志、目标授权就不能再是软约束；[官方替代风险: 低（红队/安全工具编排是垂直基础设施）]",
+    "url": "https://github.com/0x4m4/hexstrike-ai",
+    "tags": [
+      "GitHub",
+      "9,733⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p652ba18b3d",
+    "date": "2026-06-19",
+    "round": 0,
+    "grade": "⚡",
+    "title": "MCP 官方：Zero-Touch OAuth / Enterprise-Managed Authorization 稳定",
+    "desc": "MCP 官方 blog：企业可通过 IdP 集中管理 MCP server 授权，用户首次登录后自动继承 server access，避免每个 MCP 单独 OAuth/consent",
+    "why": "贴 OpenClaw MCP gateway / multi-user 权限模型；这不是模型新闻，是 MCP 从“个人工具协议”走向企业治理的关键块：统一身份、集中审计、禁止个人账号混进工作 tool chain",
+    "url": "https://blog.modelcontextprotocol.io/posts/enterprise-managed-auth/",
+    "tags": [
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p389e6cfcc6",
+    "date": "2026-06-19",
+    "round": 0,
+    "grade": "💡",
+    "title": "LINUX DO：傻逼 codex 给我系统删了",
+    "desc": "101 回复 / 345 likes：中文社区又一个 coding agent 权限事故帖，标题粗但信号很清楚：agent 能动文件系统时，工作目录边界、危险命令、回滚和审批都必须产品化",
+    "why": "和昨天豆包 sandbox 事件是一条线：不是“Codex 不好”，而是 agent harness 的默认权限设计如果不保守，普通用户会直接付出系统级代价",
+    "url": "https://linux.do/t/topic/2427755",
+    "tags": [
+      "LINUX DO",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p04cca06617",
+    "date": "2026-06-18",
+    "round": 0,
+    "grade": "🔥",
+    "title": "splx-ai/agentic-radar (981⭐)",
+    "desc": "面向 agentic workflow 的安全扫描器：能扫 LangGraph / CrewAI / n8n / OpenAI Agents / AutoGen，识别 tools、MCP server、workflow graph、漏洞映射，生成 HTML report；OpenAI Agents 还支持 runtime adversarial tests（prompt injection / PII leak / harmful content / fake news）",
+    "why": "OpenClaw agent workflow / LangGraph / MCP 安全基线；这和 Snyk/Cisco 不完全重复，它更偏“从代码/工作流恢复 agent 拓扑 + 出报告”，适合作为 OpenClaw 第三方 skill/workflow 入库前的可视化审计参考；[官方替代风险: 低（跨框架 agent workflow 可视化 + 安全报告是基础设施层）]",
+    "url": "https://github.com/splx-ai/agentic-radar",
+    "tags": [
+      "GitHub",
+      "981⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p5e15cfa568",
+    "date": "2026-06-18",
+    "round": 0,
+    "grade": "⚡",
+    "title": "LINUX DO：豆包 agent 沙盒疑似隔离问题",
+    "desc": "93 回复 / 402 likes：中文社区讨论“豆包 agent 沙盒疑似可直接读写 s3 文件系统根目录”的安全事件",
+    "why": "agent sandbox / 文件系统隔离 / 云端执行环境权限边界，正好对应 OpenClaw 后续做节点执行、skills 市场和第三方 MCP 的安全边界设计",
+    "url": "https://linux.do/t/topic/2427590",
+    "tags": [
+      "LINUX DO",
+      "MCP",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pd046c6aadb",
+    "date": "2026-06-18",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Elastic：Agent Memory on Elasticsearch",
+    "desc": "HN front page：三类 memory index、hybrid recall + reranker、supersession、decay、per-user DLS isolation；168 问 QA eval R@10=0.89 且 zero tenant leaks",
+    "why": "OpenClaw memory/RAG 长期记忆；重点不是“用 ES 做向量库”，而是把 episodic/semantic/procedural memory、事实替换、时间衰减、多租户隔离这些工程边界一次性讲清楚。配套 demo repo 只有 5⭐，所以不按仓库推，按架构文章推",
+    "url": "https://www.elastic.co/search-labs/blog/agent-memory-elasticsearch",
+    "tags": [
+      "5⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p52473275bd",
+    "date": "2026-06-18",
+    "round": 0,
+    "grade": "🔥",
+    "title": "cisco-ai-defense/mcp-scanner (966⭐)",
+    "desc": "Cisco AI Defense 出的 MCP 安全扫描器：能扫 MCP tools / prompts / resources / server instructions，支持 YARA、LLM-as-judge、Cisco inspect API、VirusTotal、pip-audit、readiness、prompt defense，还能扫本机已知 MCP client config",
+    "why": "OpenClaw MCP/skills 安全基线；昨天推了 Snyk agent-scan，Cisco 这个更偏 MCP 专项体检 + CI/offline static scan，可以拿来对比设计 OpenClaw 的“第三方 MCP 入库前扫描”和本机配置巡检；[官方替代风险: 低（MCP 安全审计/CI 扫描/跨客户端 config 扫描是基础设施层，不太会被单一客户端完全吃掉）]",
+    "url": "https://github.com/cisco-ai-defense/mcp-scanner",
+    "tags": [
+      "GitHub",
+      "966⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pb3c2c383d6",
+    "date": "2026-06-18",
+    "round": 0,
+    "grade": "⚡",
+    "title": "steipete/claude-code-mcp (1,300⭐)",
+    "desc": "把 Claude Code 包成一个 one-shot MCP tool：Cursor/Windsurf/其他 MCP client 卡住时，可以把复杂多步编辑委派给独立 Claude Code 进程",
+    "why": "OpenClaw sessions_send/subagent 委派；亮点不是“再套一层 Claude”，而是把“agent in agent”的边界讲清楚：默认 `--dangerously-skip-permissions` 很危险，但 README 也明确建议优先用 Claude Code 原生 permission/mcp serve。适合参考 OpenClaw 子 agent 委派时的 permission ownership 文档；[官方替代风险: 高（Claude Code 原生 MCP/permission 会继续增强；它的价值主要是桥接其他客户端）]",
+    "url": "https://github.com/steipete/claude-code-mcp",
+    "tags": [
+      "GitHub",
+      "1,300⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p9c0387656d",
+    "date": "2026-06-18",
+    "round": 0,
+    "grade": "💡",
+    "title": "LINUX DO：AI 时代做开源项目被 AI 洗稿重构发外网",
+    "desc": "47 回复 / 124 likes：中文开源作者吐槽自己的项目被人用 AI 改名重构、搬到外网重新发布",
+    "why": "这不是工具推荐，是开源生态事件感：AI coding 让“快速洗稿开源项目”成本变低，和 Alex 后续做 ClawHub/skills 市场、agent skill 分发时的署名、license、溯源、信任机制有关",
+    "url": "https://linux.do/t/topic/2425564",
+    "tags": [
+      "LINUX DO",
+      "Agent",
+      "Skills"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "paf1f622b28",
+    "date": "2026-06-18",
+    "round": 0,
+    "grade": "💡",
+    "title": "Show HN: Inkwash",
+    "desc": "218pt / 24 comments：一个水彩 ink wash sketching app，文章里把 fluid sim + shader trick 的核心引擎做成了交互 demo",
+    "why": "不是 Agent 主线，但很 Radar：交互式解释 + 创意工具 + iPad 绘画体验，适合做 dashboard/内容可视化时参考“解释过程比成品更好看”的表达方式",
+    "url": "https://johnowhitaker.github.io/inkwash/about",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p881f6b1764",
+    "date": "2026-06-18",
+    "round": 0,
+    "grade": "🔥",
+    "title": "chopratejas/headroom (31,740⭐)",
+    "desc": "本地 context compression layer：压缩 tool outputs / logs / RAG chunks / files / history，支持 library、proxy、MCP、Claude/Codex/Cursor/OpenClaw wrapper，还带 reversible retrieve 和 cross-agent memory",
+    "why": "OpenClaw token/cost/context 管理；价值不是“再做一个 compaction”，而是把 agent 工具输出压缩、可逆检索、失败 session 学习、output token shaping 放到一个本地代理层里；可直接参考 OpenClaw 的 tool-result 压缩和 session cost 设计；[官方替代风险: 中（平台会做原生 compaction，但跨 agent、本地代理、可逆压缩仍有独立空间）]",
+    "url": "https://github.com/chopratejas/headroom",
+    "tags": [
+      "GitHub",
+      "31,740⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pa304a09f6a",
+    "date": "2026-06-18",
+    "round": 0,
+    "grade": "⚡",
+    "title": "yvgude/lean-ctx (2,753⭐)",
+    "desc": "单 Rust binary 的本地 context intelligence layer：自动给 Claude Code/Codex/Cursor/Gemini 等压缩 file read 和 shell output，带 session memory、knowledge graph、context proof、dashboard 和 76 个 MCP tools",
+    "why": "OpenClaw context budget / code graph / multi-agent handoff；它比 headroom 更偏“让 agent 读对内容 + 证明省了什么”，适合对照 OpenClaw 的 read/memory_search/process 输出策略；[官方替代风险: 中（官方会压缩上下文，但本地 shell hook + MCP + proof ledger 很难完全内置）]",
+    "url": "https://github.com/yvgude/lean-ctx",
+    "tags": [
+      "GitHub",
+      "2,753⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pb02ce61775",
+    "date": "2026-06-18",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Panniantong/Agent-Reach (33,325⭐)",
+    "desc": "中文 Agent 互联网能力层：给 Claude Code/OpenClaw/Cursor 装网页、GitHub、YouTube、RSS、V2EX、B站、Twitter/X、Reddit、小红书等读取/搜索渠道，强调免费、可诊断、后端可替换",
+    "why": "Radar 当前 X/V2EX/LINUX DO 采集痛点；它不是单一 scraper，而是“渠道路由 + doctor + skill 安装”的包装思路，值得参考 signal-hub/opencli 信息源健康层。但它安装会改工具链/需要 cookie，先观摩设计，不建议直接在主环境一键装；[官方替代风险: 低（平台不会统一覆盖国内社区/多后端路由）]",
+    "url": "https://github.com/Panniantong/Agent-Reach",
+    "tags": [
+      "GitHub",
+      "33,325⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p6f36890138",
+    "date": "2026-06-18",
+    "round": 0,
+    "grade": "💡",
+    "title": "Show HN: ribbie.tv — 8-bit live baseball gamecast",
+    "desc": "208pt / 118 comments：把 MLB 实时数据流变成近实时像素风直播，有球场、昼夜、记分牌和局间动画",
+    "why": "不是 Agent 主线，但很 Radar：把实时数据流产品化成“小游戏直播”的脑洞，适合做 dashboard/Board 可视化灵感",
+    "url": "https://ribbie.tv/watch",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pb316eac9da",
+    "date": "2026-06-17",
+    "round": 0,
+    "grade": "🔥",
+    "title": "snyk/agent-scan (2,589⭐)",
+    "desc": "Snyk 出的本机 agent/MCP/skills 安全扫描器：能自动发现 Claude Code、Cursor、Gemini CLI、Codex、OpenClaw 等配置，扫 prompt injection、tool poisoning、toxic flows、skill 恶意载荷和凭证处理问题",
+    "why": "OpenClaw skills/MCP 安全基线；尤其值得注意：扫描 stdio MCP config 会执行其中 command，工具本身也明确建议 sandbox/逐条 consent，这正好能转成 OpenClaw 的“第三方 skill/MCP 安装前审计”清单；[官方替代风险: 低（安全审计/跨 agent inventory，平台不太会统一覆盖）]",
+    "url": "https://github.com/snyk/agent-scan",
+    "tags": [
+      "GitHub",
+      "2,589⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pcbd7edab53",
+    "date": "2026-06-17",
+    "round": 0,
+    "grade": "⚡",
+    "title": "agentgateway/agentgateway (3,329⭐)",
+    "desc": "Linux Foundation 下的 Agentic Proxy：把 LLM gateway、MCP gateway、A2A gateway、RBAC/CEL policy、rate limit、OpenTelemetry 收到一个 Rust 代理里",
+    "why": "OpenClaw Gateway / MCP 聚合 / agent-to-agent 协议；它不是简单 MCP proxy，而是把 agent→LLM、agent→tool、agent→agent 三条链路都当成可治理流量，这个架构视角值得看；[官方替代风险: 中（企业平台会做，但 LF/开源代理有参考价值）]",
+    "url": "https://github.com/agentgateway/agentgateway",
+    "tags": [
+      "GitHub",
+      "3,329⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p5cf9f574ff",
+    "date": "2026-06-17",
+    "round": 0,
+    "grade": "⚡",
+    "title": "stacklok/toolhive (1,886⭐)",
+    "desc": "本地/企业两用 MCP 平台：把任意 MCP server 跑在隔离容器里，支持 registry、gateway、desktop UI、K8s operator、OIDC/审计/OTel，还宣称 semantic tool search 可降 token",
+    "why": "OpenClaw MCP 安全隔离和工具市场；相比 agentgateway 更“落地到 MCP server 生命周期管理”：安装、隔离、权限、审计、注册表，适合参考 ClawHub/skills registry 的生产化边界；[官方替代风险: 低-中（MCP 客户端会内置部分管理，但容器隔离+企业治理是独立基础设施）]",
+    "url": "https://github.com/stacklok/toolhive",
+    "tags": [
+      "GitHub",
+      "1,886⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pf30757c815",
+    "date": "2026-06-17",
+    "round": 0,
+    "grade": "💡",
+    "title": "RFC 10008：HTTP QUERY Method",
+    "desc": "新的 HTTP QUERY 方法进入 RFC：语义上像“带 body 的安全/幂等查询”，比 POST 更适合可重试、可缓存、无副作用的数据查询",
+    "why": "不是 Agent 工具，但对 API 设计有意思：未来 RAG/search/agent tool endpoint 里很多“复杂查询但不应产生副作用”的接口，可能会有比 GET/POST 更准确的语义选择",
+    "url": "https://www.rfc-editor.org/info/rfc10008/",
+    "tags": [
+      "Agent",
+      "安全"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p88bdfe0093",
+    "date": "2026-06-17",
+    "round": 0,
+    "grade": "🔥",
+    "title": "ChromeDevTools/chrome-devtools-mcp (43,824⭐)",
+    "desc": "Google 官方 Chrome DevTools MCP：让 Claude/Cursor/Copilot 这类 coding agent 直接控制真实 Chrome，读 console/network、截图、跑 performance trace，不再只靠 Playwright 黑盒点击",
+    "why": "OpenClaw Browser Bridge / browser tool / dashboard 调试线；亮点是“官方 DevTools 能力 MCP 化”，适合做网页自动化与前端调试基线。注意默认有 usage statistics / update checks，接入前要关；[官方替代风险: 低（它本身就是官方 Chrome DevTools 入口）]",
+    "url": "https://github.com/ChromeDevTools/chrome-devtools-mcp",
+    "tags": [
+      "GitHub",
+      "43,824⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p22abbc283d",
+    "date": "2026-06-17",
+    "round": 0,
+    "grade": "⚡",
+    "title": "kenn-io/agentsview (2,762⭐)",
+    "desc": "本地优先的 coding agent session 搜索/成本/用量看板：支持 Claude Code、Codex 和 20+ agent，把本机 session 同步进 SQLite，Web UI 只绑 127.0.0.1",
+    "why": "OpenClaw 多 session / usage / cost dashboard；不是“又一个聊天 UI”，而是把 agent 运行痕迹、成本和历史搜索产品化，适合参考 Radar/Board/Session 统计体验；[官方替代风险: 中（官方会做 usage，但跨 agent、本地 SQLite、可搜索历史仍有独立价值）]",
+    "url": "https://github.com/kenn-io/agentsview",
+    "tags": [
+      "GitHub",
+      "2,762⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pf788c3f6db",
+    "date": "2026-06-17",
+    "round": 0,
+    "grade": "⚡",
+    "title": "lintsinghua/claude-code-book (3,682⭐)",
+    "desc": "中文 42 万字《御舆：解码 Agent Harness》：不是 Claude Code 使用教程，而是拆对话循环、工具权限管线、context compaction、subagent fork、MCP/skills/hooks 的架构分析",
+    "why": "Agent Harness / OpenClaw 架构设计 / 求职表达；这本更像“把你正在搭的系统讲清楚”的中文参考资料，可直接补面试时的架构语言；[官方替代风险: 低（知识/分析型内容，不是平台功能）]",
+    "url": "https://github.com/lintsinghua/claude-code-book",
+    "tags": [
+      "GitHub",
+      "3,682⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pbce04f3cc7",
+    "date": "2026-06-17",
+    "round": 0,
+    "grade": "💡",
+    "title": "LINUX DO：4-5月 agent 社招面经",
+    "desc": "90 回复 / 327 likes：Java 后端背景转 Agent 岗的一手面经，标题就很贴 Alex 当前路线",
+    "why": "8 月求职；这类不是工具，但比泛泛“AI 工程师岗位趋势”有用，能反推面试会问 LangGraph/MCP/RAG/ReAct 哪些落地点",
+    "url": "https://linux.do/t/topic/2416951",
+    "tags": [
+      "LINUX DO",
+      "MCP",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p8ef7a6a218",
+    "date": "2026-06-17",
+    "round": 0,
+    "grade": "🔥",
+    "title": "zilliztech/claude-context (11,866⭐)",
+    "desc": "Claude Code / coding agent 的语义代码搜索 MCP：把大代码库索引进 vector DB，让 agent 不再靠多轮 grep/整目录硬读找上下文",
+    "why": "OpenClaw 代码上下文 / RAG / MCP 主线；价值是“大仓库 context retriever”成熟度高、VS Code + MCP 双入口，但需要 Zilliz Cloud/Milvus + OpenAI embedding，非本地优先；[官方替代风险: 中（Claude Code 自身会增强代码检索，但可插拔 RAG/Milvus 方案仍有基础设施价值）]",
+    "url": "https://github.com/zilliztech/claude-context",
+    "tags": [
+      "GitHub",
+      "11,866⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p0f84068357",
+    "date": "2026-06-17",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Cranot/roam-code (482⭐)",
+    "desc": "本地代码库 intelligence CLI + MCP：SQLite code graph、28 语言、preflight blast radius、change evidence packet、MCP egress secret scrub",
+    "why": "OpenClaw agent 安全 / code graph / CI evidence；star 未到 ⚡ 常规 500 门槛但接近，且方向比普通 code search 更狠：不是“帮 agent 找代码”，而是“改前风险判定 + 改后可审计证据”；[官方替代风险: 低-中（平台会做代码检索，但本地证据链/审计包更像独立基础设施）]",
+    "url": "https://github.com/Cranot/roam-code",
+    "tags": [
+      "GitHub",
+      "482⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pc890bb3a55",
+    "date": "2026-06-17",
+    "round": 0,
+    "grade": "💡",
+    "title": "V2EX：变色龙 Ultra 开源 NFC 渗透工具抽奖帖",
+    "desc": "206 回复：RfidResearchGroup/ChameleonUltra（2,659⭐）被中文社区再次炒热；硬件 + CLI + NFC 读写/模拟/破解，帖子里还有日常门禁/Amiibo 等场景",
+    "why": "不是 Agent 主线，但很 Radar：开源硬件安全工具 + 中文社区真实玩法，比普通工具列表更有“能上手玩”的感觉；官方替代风险不适用",
+    "url": "https://www.v2ex.com/t/1220946",
+    "tags": [
+      "V2EX",
+      "2,659⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p48fcf47fd9",
+    "date": "2026-06-17",
+    "round": 0,
+    "grade": "💡",
+    "title": "HN：Running local models is good now",
+    "desc": "1052pt / 437 comments：Vicki Boykis 写的本地模型实用性复盘，讨论已经从“能不能跑”转向“哪些任务本地足够好、如何工程化接入”",
+    "why": "不推模型评测本身，推这个是因为它贴 OpenClaw 本地优先路线：本地小模型适合隐私/批处理/低成本工具链，不该只盯 frontier model；可作为本地 agent 节点设计参考",
+    "url": "https://vickiboykis.com/2026/06/15/running-local-models-is-good-now/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p3ccd125781",
+    "date": "2026-06-16",
+    "round": 0,
+    "grade": "🔥",
+    "title": "anthropics/claude-plugins-official (30,243⭐)",
+    "desc": "Anthropic 官方 Claude Code Plugin marketplace 目录：插件标准结构已经明确支持 commands / agents / skills / MCP，并有 third-party submission 入口",
+    "why": "OpenClaw skills / ClawHub / agent skill 分发生态；这说明“skill/plugin marketplace”已经变成官方方向，Alex 自己做 OpenClaw skill/agent protocol 时要把互操作和可安装标准纳入设计；[官方替代风险: 低（它本身就是官方目录，价值在对齐标准）]",
+    "url": "https://github.com/anthropics/claude-plugins-official",
+    "tags": [
+      "GitHub",
+      "30,243⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p8b32f8afcb",
+    "date": "2026-06-16",
+    "round": 0,
+    "grade": "⚡",
+    "title": "louislva/claude-peers-mcp (2,111⭐)",
+    "desc": "让多个 Claude Code session 在本机互相发现、发消息、登记当前任务摘要；broker daemon + SQLite + Claude channel push",
+    "why": "OpenClaw sessions_send / 多 agent 协作；不建议直接接生产，因为 quick start 用 `--dangerously-load-development-channels`，但“peer discovery + summary + ad-hoc message”这套交互很像 OpenClaw agent team 的轻量协议参考；[官方替代风险: 中（Claude Code 可能内置更强协作，但跨 session 协议设计仍有参考价值）]",
+    "url": "https://github.com/louislva/claude-peers-mcp",
+    "tags": [
+      "GitHub",
+      "2,111⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p0e5e65adbe",
+    "date": "2026-06-16",
+    "round": 0,
+    "grade": "💡",
+    "title": "BoltzmannEntropy/MimikaStudio (585⭐)",
+    "desc": "Apple Silicon 本地语音克隆/TTS/audiobook 工具，支持 Qwen3-TTS、Chatterbox、Kokoro，并暴露 MCP/API job queue",
+    "why": "本地优先 + OpenClaw 语音节点；亮点是“本地 TTS/voice clone 变成 agent 可调用的 job server”，但许可证是 BSL/source-available，且当前主要 macOS Apple Silicon；[官方替代风险: 低]",
+    "url": "https://github.com/BoltzmannEntropy/MimikaStudio",
+    "tags": [
+      "GitHub",
+      "585⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pcc1f369f89",
+    "date": "2026-06-16",
+    "round": 0,
+    "grade": "💡",
+    "title": "LINUX DO：聊聊黑 GEO，也就是怎么给大模型搜索下毒",
+    "desc": "36 回复 / 79 likes：中文社区开始讨论“给 AI 搜索结果下毒”的黑产/安全玩法",
+    "why": "AI 安全方向监控；这不是模型评测，而是 RAG/agent 搜索链路的现实攻击面：未来做 agent browsing / retrieval 时，来源信誉、引用验证、结果隔离都得当基础设施处理",
+    "url": "https://linux.do/t/topic/2416059",
+    "tags": [
+      "LINUX DO",
+      "Agent",
+      "安全"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p237e3d6bb9",
+    "date": "2026-06-16",
+    "round": 0,
+    "grade": "🔥",
+    "title": "obra/superpowers (229,157⭐)",
+    "desc": "agentic skills framework + 软件开发方法论：让 Claude Code / Codex / Gemini / OpenCode 等先问清需求、分块写 spec、确认 design，再按 TDD + subagent-driven-development 执行，目标是让 coding agent 连续自主工作数小时不偏航",
+    "why": "OpenClaw skills / Agent 自循环 / 多 agent 协作协议；重点不是“又一套提示词”，而是把 spec→plan→subagent→review 变成可安装 skill 工作流；已进入 Claude/Codex plugin marketplace；[官方替代风险: 中-高（平台会内置部分流程，但项目价值在方法论和技能组合）]",
+    "url": "https://github.com/obra/superpowers",
+    "tags": [
+      "GitHub",
+      "229,157⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pc5b6acfe2d",
+    "date": "2026-06-16",
+    "round": 0,
+    "grade": "⚡",
+    "title": "swarmclawai/swarmvault (569⭐)",
+    "desc": "local-first LLM Wiki / knowledge graph / RAG 知识库：把 docs、code、transcripts、notes、URL 编译成本地 markdown wiki + graph + search index，并支持 MCP/server、context packs、review bundles",
+    "why": "OpenClaw memory / workspace / RAG 求职主线；比单纯向量库更像“可审计的本地知识资产层”，首次运行不用 API key，Node >=24；MIT；[官方替代风险: 中]",
+    "url": "https://github.com/swarmclawai/swarmvault",
+    "tags": [
+      "GitHub",
+      "569⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pb8c413e5c7",
+    "date": "2026-06-16",
+    "round": 0,
+    "grade": "💡",
+    "title": "V2EX：想请教 Claude 如何实战，从头到尾做一个 iOS app",
+    "desc": "58 回复热帖：一个人想用 Claude 做完整产品，从 PRD、UI、架构到实现，但卡在 chat 模式、skill 设计和流程拆分",
+    "why": "普通用户还停在“怎么用 Claude 做项目”，而 OpenClaw/skills/agent team 已经是更高阶解法；适合作为求职时解释 AI Agent 工程化价值的中文语料",
+    "url": "https://www.v2ex.com/t/1220708",
+    "tags": [
+      "V2EX",
+      "Agent",
+      "Skills"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pc34c9c919f",
+    "date": "2026-06-16",
+    "round": 0,
+    "grade": "💡",
+    "title": "HN：Banned Book Library in a Wi‑Fi Smart Light Bulb",
+    "desc": "336pt / 171 comments：把禁书图书馆塞进 Wi‑Fi 智能灯泡，通过本地 AP 分发内容",
+    "why": "不是求职工具，但很 Radar：本地优先、硬件 hack、离线分发、反审查传播的组合脑洞，属于“短视频替代品”级别的好玩项目",
+    "url": "https://www.richardosgood.com/posts/banned-book-library/",
+    "tags": [],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p24ded314c2",
+    "date": "2026-06-16",
+    "round": 0,
+    "grade": "🔥",
+    "title": "holaboss-ai/holaOS (5,508⭐)",
+    "desc": "local-first 工作型 agent OS：把本地 workspace、Markdown+SQLite vec 记忆、session compaction、OAuth 集成、隐藏 subagents 和桌面 UI 合在一起，目标是让 agent 记住真实工作上下文",
+    "why": "不建议直接替代 OpenClaw；价值是竞品设计参考：它把 OpenClaw 正在做的 memory / workspace / long-horizon session / agent UI 产品化到桌面层；macOS supported，Windows/Linux in progress；Modified Apache 2.0；[官方替代风险: 高（平台型产品，且与 OpenClaw 自研重叠）]",
+    "url": "https://github.com/holaboss-ai/holaOS",
+    "tags": [
+      "GitHub",
+      "5,508⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p2a97d88417",
+    "date": "2026-06-16",
+    "round": 0,
+    "grade": "⚡",
+    "title": "LvcidPsyche/auto-browser (557⭐)",
+    "desc": "MCP-native browser control plane：给 agent 一个真实 Playwright 浏览器，但保留 human takeover、登录态 profile、approval、audit、PII scrub、Witness receipts",
+    "why": "OpenClaw Browser Bridge / Web automation / tool approval；重点不是绕过登录，而是“人接管一次 → 保存 auth profile → agent 后续在可审计边界里复用”；MIT；[官方替代风险: 低-中]",
+    "url": "https://github.com/LvcidPsyche/auto-browser",
+    "tags": [
+      "GitHub",
+      "557⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p695d7eaf0d",
+    "date": "2026-06-16",
+    "round": 0,
+    "grade": "💡",
+    "title": "HN：LinkedIn offer backdoor 事件",
+    "desc": "764pt / 151 comments：伪装成招聘机会的后门投递链，帖子把 payload、社工入口、开发者环境风险讲得很清楚",
+    "why": "求职季 + 开发者安全的交叉提醒：8 月社招时“面试题/作业/招聘方脚本”不能直接跑在主机环境，和 nono / agent sandbox / tool approval 是一条线",
+    "url": "https://roman.pt/posts/linkedin-backdoor/",
+    "tags": [
+      "Agent",
+      "安全"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pe7a673354e",
+    "date": "2026-06-16",
+    "round": 0,
+    "grade": "💡",
+    "title": "smart-mcp-proxy/mcpproxy-go (257⭐)",
+    "desc": "单二进制 MCP gateway：把一堆 MCP server 收口成一个 endpoint，用 `retrieve_tools` 降低工具 schema 暴露，并带 quarantine、security scanners、activity log、macOS menu bar",
+    "why": "OpenClaw MCP 聚合与安全隔离；star 不高但方向准确，适合参考“工具发现 + 工具隔离 + 审计 UI”交互，不一定直接接入；MIT；[官方替代风险: 中]",
+    "url": "https://github.com/smart-mcp-proxy/mcpproxy-go",
+    "tags": [
+      "GitHub",
+      "257⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p6237e28123",
+    "date": "2026-06-15",
+    "round": 0,
+    "grade": "🔥",
+    "title": "thedotmack/claude-mem (82,438⭐)",
+    "desc": "Claude Code / OpenClaw 的跨会话记忆插件：自动捕捉 session/tool 观察，压缩成语义摘要，下次会话按需注入；还提供 OpenClaw Gateway 一键安装路径",
+    "why": "OpenClaw memory/skills/多 agent 长任务；和昨天 engram 类似但更“直接接 OpenClaw”，可作为现有 memory_search / MEMORY.md 之外的产品化对照；Apache-2.0；[官方替代风险: 中]",
+    "url": "https://github.com/thedotmack/claude-mem",
+    "tags": [
+      "GitHub",
+      "82,438⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p3168445d1d",
+    "date": "2026-06-15",
+    "round": 0,
+    "grade": "⚡",
+    "title": "farion1231/cc-switch (101,435⭐)",
+    "desc": "跨 Claude Code / Codex / Gemini CLI / OpenCode / OpenClaw 的桌面配置切换器：管理 provider、MCP、prompts、skills、session，并支持本地 proxy / failover / usage dashboard",
+    "why": "不建议直接替代 OpenClaw；价值在竞品交互：它把 API 渠道、MCP、skills、prompt、session 管理做成了一个 Tauri 桌面控制台，适合参考 Gateway/Board/配置管理体验；MIT；[官方替代风险: 高（平台/自研系统可覆盖）]",
+    "url": "https://github.com/farion1231/cc-switch",
+    "tags": [
+      "GitHub",
+      "101,435⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pde28dbc374",
+    "date": "2026-06-15",
+    "round": 0,
+    "grade": "💡",
+    "title": "V2EX：NocoBase 半年收入再次翻倍",
+    "desc": "1075 回复热帖：低代码/无代码项目在“满屏 AI 焦虑”里继续增长，尤其海外收入更快；附《程序员和软件还有前途吗》复盘",
+    "why": "中文独立开发/开源商业化的一手故事；不是泛泛“AI 做 SaaS”，而是软件工程、垂直场景、全球化分发在 AI 焦虑中的反例",
+    "url": "https://www.v2ex.com/t/1220564",
+    "tags": [
+      "V2EX"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pa47e810c95",
+    "date": "2026-06-15",
+    "round": 0,
+    "grade": "🔥",
+    "title": "Show HN: tamnd/kage (969⭐)",
+    "desc": "把任意网站渲染成可离线浏览的静态镜像：真实 Chrome 跑完页面后 snapshot DOM、剥掉所有 JavaScript、本地化 CSS/图片/字体，还能打包成 ZIM 或单文件可执行 viewer",
+    "why": "知识库/资料归档和 agent 读取网页资料链路；这不是普通 wget，而是“把动态网页冻成无脚本、可长期保存的离线 artifact”，适合保存教程、文档、个人博客；MIT；[官方替代风险: 低]",
+    "url": "https://github.com/tamnd/kage",
+    "tags": [
+      "GitHub",
+      "969⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pa7fa3ed5e4",
+    "date": "2026-06-15",
+    "round": 0,
+    "grade": "⚡",
+    "title": "bartolli/codanna (695⭐)",
+    "desc": "Rust 写的 local code intelligence MCP/CLI：给 coding agent 做 symbol search、call graph、semantic search、文档 RAG，支持 Claude/Gemini/Codex，查找可到 sub-10ms",
+    "why": "和上午 gortex 同一条“本地代码理解层”赛道，但 Codanna 更成熟：Homebrew/Nix/Windows 安装、支持 Rust/Python/TS/Java/Go 等主流语言；适合拿来对比 OpenClaw 的代码上下文方案；Apache-2.0；[官方替代风险: 中]",
+    "url": "https://github.com/bartolli/codanna",
+    "tags": [
+      "GitHub",
+      "695⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p12097c9405",
+    "date": "2026-06-15",
+    "round": 0,
+    "grade": "💡",
+    "title": "V2EX：怎么通俗地和老板解释国外旗舰模型强在哪？",
+    "desc": "101 回复热帖：问题是 CTO/CFO 问“国内模型和国外模型编程差多少，买国内 Coding Plan 可以吗？”",
+    "why": "8 月求职和团队沟通：这类问题就是 AI Agent 工程师需要能讲清楚的“技术预算翻译”能力，不只是模型偏好",
+    "url": "https://www.v2ex.com/t/1220413",
+    "tags": [
+      "V2EX",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pf976f9abaf",
+    "date": "2026-06-15",
+    "round": 0,
+    "grade": "💡",
+    "title": "HN：curl 7 月暂停接收漏洞报告",
+    "desc": "curl maintainer 明说 2026 年 7 月不接收 vulnerability reports，因为维护者要休假；HN 244pt 讨论开源基础设施维护边界",
+    "why": "有事件感：不是工具推荐，是“关键开源项目也需要维护者休息”的现实信号；对依赖治理、安全响应预期很有参考",
+    "url": "https://daniel.haxx.se/blog/2026/06/15/curl-summer-of-bliss/",
+    "tags": [
+      "安全"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p8256bf5839",
+    "date": "2026-06-15",
+    "round": 0,
+    "grade": "🔥",
+    "title": "always-further/nono (2,681⭐)",
+    "desc": "Sigstore 团队背景的 agent sandbox：不用 daemon/container/VM，几秒钟把 Claude Code、Codex、OpenCode、OpenClaw 等放进最小权限沙箱，默认只暴露当前目录，SSH key / cloud credentials / 其他磁盘路径不可见",
+    "why": "OpenClaw tool approval / Node / Gateway 安全线；和昨天的 pipelock/Claw Patrol 不同，它解决的是本机执行隔离层，适合先在高风险 agent session 外套一层；Apache-2.0 标识；[官方替代风险: 低]",
+    "url": "https://github.com/always-further/nono",
+    "tags": [
+      "GitHub",
+      "2,681⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p6b78e84cce",
+    "date": "2026-06-15",
+    "round": 0,
+    "grade": "⚡",
+    "title": "zzet/gortex (126⭐)",
+    "desc": "100% local code graph / code intelligence engine：257 语言、多仓库索引、CLI + MCP + API，让 agent 查 symbol/call chain/blast radius，而不是整文件硬读；README 直接标 OpenClaw/Claude Code/Codex 支持",
+    "why": "RAG/Agent/MCP 求职主线和 OpenClaw 多 agent 代码理解；star 刚过门槛但方向很准，价值是“给 coding agent 的本地代码知识图谱”，比泛用向量 RAG 更贴工程；Apache-2.0 标识；[官方替代风险: 中]",
+    "url": "https://github.com/zzet/gortex",
+    "tags": [
+      "GitHub",
+      "126⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p6e06a9a063",
+    "date": "2026-06-15",
+    "round": 0,
+    "grade": "💡",
+    "title": "V2EX：想讨论一下对于 AI 付费的看法",
+    "desc": "中文社区热帖：前端同事用免费工具嫌 AI 不好用、不愿沟通报销，最后因效率问题被优化；帖主算账认为一个月二三百的 AI 工具成本很快回本",
+    "why": "8 月求职和 AI Agent 工程师定位；这是面试/团队沟通素材：AI 工具付费不是“自费上班”，而是生产力预算和职业竞争力问题",
+    "url": "https://www.v2ex.com/t/1220323",
+    "tags": [
+      "V2EX",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pf6d8f8efe3",
+    "date": "2026-06-14",
+    "round": 0,
+    "grade": "🔥",
+    "title": "luckyPipewrench/pipelock (717⭐)",
+    "desc": "MCP/agent egress firewall：拦在 agent 外面扫描 HTTP、MCP、A2A、WebSocket 流量，防 exfiltration / SSRF / prompt injection，还会生成 mediator-signed action receipts",
+    "why": "OpenClaw Gateway / tool approval / audit trail；价值点是“在 agent 外部留可验证执行证据”，比只靠模型自觉更靠谱；Apache-2.0；[官方替代风险: 低]",
+    "url": "https://github.com/luckyPipewrench/pipelock",
+    "tags": [
+      "GitHub",
+      "717⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pfb2eff49cb",
+    "date": "2026-06-14",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Gentleman-Programming/engram (4,334⭐)",
+    "desc": "agent-agnostic persistent memory：Go binary + SQLite/FTS5，带 MCP server、HTTP API、CLI、TUI，给 Claude Code/Codex/Cursor 类 agent 做跨会话记忆",
+    "why": "OpenClaw memory/skills/多 agent 长任务；不是“又一个向量库”，而是可本地审计、可 grep 的 agent memory 层；MIT；[官方替代风险: 中]",
+    "url": "https://github.com/Gentleman-Programming/engram",
+    "tags": [
+      "GitHub",
+      "4,334⭐",
+      "MCP"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p973aa34f9b",
+    "date": "2026-06-14",
+    "round": 0,
+    "grade": "💡",
+    "title": "V2EX：做了 3 个月中转站，真的赚不到钱",
+    "desc": "站主公开算账：600+ 注册、约 1/3 付费，Pro/Plus 正价账号、封号、服务器、家宽 IP、客服成本叠加后几乎不赚钱",
+    "why": "和 Alex 的 apiyi/API channel 风险直接相关；这是中文社区一手经营数据，比“中转站很卷”更有参考价值",
+    "url": "https://www.v2ex.com/t/1220335",
+    "tags": [
+      "V2EX"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pc2300f2945",
+    "date": "2026-06-14",
+    "round": 0,
+    "grade": "🔥",
+    "title": "microsoft/agent-governance-toolkit (4,273⭐)",
+    "desc": "Microsoft 新出的 Agent Governance Toolkit：把 policy enforcement、zero-trust identity、execution sandboxing、tamper-evident audit log 放到 agent tool call 之前，覆盖 OWASP Agentic Top 10",
+    "why": "OpenClaw tool approval / Gateway / 多 agent 安全；价值点不是模型安全，而是“让违规 action 在 deterministic code 层结构性不可达”；MIT；Public Preview；[官方替代风险: 低（官方工具）]",
+    "url": "https://github.com/microsoft/agent-governance-toolkit",
+    "tags": [
+      "GitHub",
+      "4,273⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p928661b745",
+    "date": "2026-06-14",
+    "round": 0,
+    "grade": "⚡",
+    "title": "modem-dev/hunk (4,817⭐)",
+    "desc": "review-first terminal diff viewer，专门给 agent 写出来的 changeset 做 TUI 审查：多文件 sidebar、inline AI/agent notes、watch mode、Git/Jujutsu/Sapling 支持",
+    "why": "Claude Code/OpenClaw agent swarm 后的人工 review 闸口；比普通 git diff 更适合“agent 连续改一堆文件后我快速验收”；MIT；[官方替代风险: 中]",
+    "url": "https://github.com/modem-dev/hunk",
+    "tags": [
+      "GitHub",
+      "4,817⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p47f0702747",
+    "date": "2026-06-14",
+    "round": 0,
+    "grade": "⚡",
+    "title": "graykode/abtop (2,845⭐)",
+    "desc": "像 btop，但给 AI coding agents 用：实时看 Claude Code / Codex / OpenCode session、token、context window、rate limit、子进程、端口；read-only，无 API key",
+    "why": "tmux+iTerm2 多 agent 工作流和 OpenClaw dashboard/cost observability；`--json` 可接到现有看板；MIT；[官方替代风险: 低-中]",
+    "url": "https://github.com/graykode/abtop",
+    "tags": [
+      "GitHub",
+      "2,845⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p2db603c757",
+    "date": "2026-06-14",
+    "round": 0,
+    "grade": "💡",
+    "title": "asheshgoplani/agent-deck (2,703⭐)",
+    "desc": "terminal session manager / command center for AI coding agents，支持 Claude、Gemini、OpenCode、Codex，多 session 分组/搜索/通知，还带 conductor + Telegram/Slack/Discord watcher 模式",
+    "why": "和 OpenClaw 功能重叠，不建议直接迁移；但它的 conductor / watcher / session topology 可当竞品交互参考；MIT；[官方替代风险: 高（平台/自研系统可覆盖）]",
+    "url": "https://github.com/asheshgoplani/agent-deck",
+    "tags": [
+      "GitHub",
+      "2,703⭐",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
   {
     "id": "p58829866ac",
     "date": "2026-06-14",
@@ -2547,6 +4029,2868 @@ const DATA = [
     ],
     "extra": [],
     "alex_reply": "待观察"
+  },
+  {
+    "id": "pf4019cbf33",
+    "date": "2026-06-20",
+    "round": 0,
+    "grade": "💡",
+    "title": "Ask HN: Will programmers write more efficient code during the memory shortage?",
+    "desc": "HN front_page 技术信号，HN 84 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://news.ycombinator.com/item?id=48604232",
+    "tags": [
+      "HN",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pd72ec78bf4",
+    "date": "2026-06-21",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Loupe – A iOS app that raises awareness about what native apps can see",
+    "desc": "HN front_page 技术信号，HN 244 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/mysk-research/loupe",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pc16363d30f",
+    "date": "2026-06-21",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Temporary Cloudflare accounts for AI agents",
+    "desc": "HN front_page 技术信号，HN 204 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://blog.cloudflare.com/temporary-accounts/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pebf29d7aaf",
+    "date": "2026-06-21",
+    "round": 0,
+    "grade": "⚡",
+    "title": "When I reject AI code even if it works",
+    "desc": "HN front_page 技术信号，HN 158 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://vinibrasil.com/when-i-reject-ai-code-even-if-it-works/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p4f57433cc4",
+    "date": "2026-06-21",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Developers don't understand CORS (2019)",
+    "desc": "HN front_page 技术信号，HN 152 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://fosterelli.co/developers-dont-understand-cors",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p3ac0cd6858",
+    "date": "2026-06-21",
+    "round": 0,
+    "grade": "💡",
+    "title": "Building reliable agentic AI systems",
+    "desc": "HN front_page 技术信号，HN 75 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://martinfowler.com/articles/reliable-llm-bayer.html",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pc1e57cec3a",
+    "date": "2026-06-21",
+    "round": 0,
+    "grade": "💡",
+    "title": "A 3D voxel game engine written in APL",
+    "desc": "HN front_page 技术信号，HN 85 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/namgyaaal/avoxelgame",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p34f59b33d7",
+    "date": "2026-06-22",
+    "round": 0,
+    "grade": "🔥",
+    "title": "Identity verification on Claude",
+    "desc": "HN front_page 技术信号，HN 592 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://support.claude.com/en/articles/14328960-identity-verification-on-claude",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p2941e81ec5",
+    "date": "2026-06-22",
+    "round": 0,
+    "grade": "💡",
+    "title": "Show HN: Recall – fully-local project memory for Claude Code",
+    "desc": "HN front_page 技术信号，HN 77 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/raiyanyahya/recall",
+    "tags": [
+      "GitHub",
+      "Agent",
+      "CC工作流"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p6ba1605e23",
+    "date": "2026-06-22",
+    "round": 0,
+    "grade": "💡",
+    "title": "Show HN: Teach your kids perfect pitch",
+    "desc": "HN front_page 技术信号，HN 67 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/paytonjjones/bsharp",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p821c6f4d31",
+    "date": "2026-06-22",
+    "round": 0,
+    "grade": "💡",
+    "title": "There is minimal downside to switching to open models",
+    "desc": "HN front_page 技术信号，HN 63 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://www.marble.onl/posts/cancel_claude.html",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p0d8189ba98",
+    "date": "2026-06-22",
+    "round": 0,
+    "grade": "💡",
+    "title": "An Embedded Linux on a Single Floppy",
+    "desc": "HN front_page 技术信号，HN 62 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/w84death/floppinux",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pd1914c8cc2",
+    "date": "2026-06-22",
+    "round": 0,
+    "grade": "💡",
+    "title": "Good results fine tuning a local LLM like Qwen 3:0.6B to categorize questions",
+    "desc": "HN front_page 技术信号，HN 107 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://www.teachmecoolstuff.com/viewarticle/fine-tuning-a-local-llm-to-categorize-questions",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p44dafe7170",
+    "date": "2026-06-22",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Codex logging bug may write TBs to local SSDs",
+    "desc": "HN front_page 技术信号，HN 219 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/openai/codex/issues/28224",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p061b862238",
+    "date": "2026-06-22",
+    "round": 0,
+    "grade": "⚡",
+    "title": "How I play video games with spinal muscular atrophy",
+    "desc": "HN front_page 技术信号，HN 136 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://www.openassistivetech.org/how-i-actually-play-video-games-with-sma-the-tools-i-use-every-day/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pd57f62d1fa",
+    "date": "2026-06-23",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Show HN: Oak – Git alternative designed for agents",
+    "desc": "HN front_page 技术信号，HN 150 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://oak.space/oak/oak",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p841cb6c207",
+    "date": "2026-06-23",
+    "round": 0,
+    "grade": "💡",
+    "title": "Optocam Zero: a Pi Zero based digital camera made using off the shelf components",
+    "desc": "HN front_page 技术信号，HN 113 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/dorukkumkumoglu/optocamzero",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p3ec34fd319",
+    "date": "2026-06-23",
+    "round": 0,
+    "grade": "💡",
+    "title": "OpenAI DayBreak – GPT-5.5-Cyber",
+    "desc": "HN front_page 技术信号，HN 78 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://openai.com/index/daybreak-securing-the-world/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p600083386e",
+    "date": "2026-06-23",
+    "round": 0,
+    "grade": "💡",
+    "title": "Unlimited OCR: One-Shot Long-Horizon Parsing",
+    "desc": "HN front_page 技术信号，HN 119 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/baidu/Unlimited-OCR",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p969a6a0511",
+    "date": "2026-06-23",
+    "round": 0,
+    "grade": "💡",
+    "title": "Show HN: A pure ARM64 Assembly web server, now on Linux with CGI for no reason",
+    "desc": "HN front_page 技术信号，HN 40 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/imtomt/ymawky/tree/linux",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p5af2dd14ec",
+    "date": "2026-06-24",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Fired by Google for creating the Google workspace CLI",
+    "desc": "HN front_page 技术信号，HN 306 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://twitter.com/JPoehnelt/status/2069482265953087602",
+    "tags": [
+      "X/Twitter",
+      "Agent",
+      "终端工具"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p39724e7121",
+    "date": "2026-06-24",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Meta Pauses Employee-Tracking Program Following Internal Data Leak",
+    "desc": "HN front_page 技术信号，HN 210 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://www.wired.com/story/meta-pauses-employee-tracking-program-following-internal-security-breach/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pe97eea8748",
+    "date": "2026-06-24",
+    "round": 0,
+    "grade": "💡",
+    "title": "Dirty Little Zine – a tool for making an 8 page printable Zine",
+    "desc": "HN front_page 技术信号，HN 110 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://dirtylittlezine.com/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p3a9f94e3f0",
+    "date": "2026-06-24",
+    "round": 0,
+    "grade": "⚡",
+    "title": "\"Fix\" MacBook Neo Cursor Lag: Record 1 Pixel of the Screen Every 10 Seconds",
+    "desc": "HN front_page 技术信号，HN 149 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://gist.github.com/retroplasma/ec21767d0a8380c7ea9c2fbee1c7d6bf",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p609f505056",
+    "date": "2026-06-24",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Qwen-AgentWorld: Language World Models for General Agents",
+    "desc": "HN front_page 技术信号，HN 146 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://arxiv.org/abs/2606.24597",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pc51355618a",
+    "date": "2026-06-24",
+    "round": 0,
+    "grade": "💡",
+    "title": "Reid Hoffman says SpaceX 'not an AI company', xAI 'complete train wreck'",
+    "desc": "HN front_page 技术信号，HN 67 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://fortune.com/2026/06/24/reid-hoffman-spacex-musk-openai-anthropic-gen-z-mistake/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p5f52d7f438",
+    "date": "2026-06-25",
+    "round": 0,
+    "grade": "🔥",
+    "title": "OpenAI unveils its first custom chip, built by Broadcom",
+    "desc": "HN front_page 技术信号，HN 554 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://techcrunch.com/2026/06/24/openai-unveils-its-first-custom-chip-built-by-broadcom/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p1ca7950b82",
+    "date": "2026-06-25",
+    "round": 0,
+    "grade": "⚡",
+    "title": "RubyLLM: A Ruby framework for all major AI providers",
+    "desc": "HN front_page 技术信号，HN 348 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://rubyllm.com/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pcd444efe18",
+    "date": "2026-06-25",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Show HN: Nub – A Bun-like all-in-one toolkit for Node.js",
+    "desc": "HN front_page 技术信号，HN 205 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/nubjs/nub",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p1fcba37102",
+    "date": "2026-06-25",
+    "round": 0,
+    "grade": "⚡",
+    "title": "GLM-5.2 is a step change for open agents",
+    "desc": "HN front_page 技术信号，HN 132 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://www.interconnects.ai/p/glm-52-is-the-step-change-for-open",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p317552b24b",
+    "date": "2026-06-25",
+    "round": 0,
+    "grade": "💡",
+    "title": "Anthropic says Alibaba illicitly extracted Claude AI model capabilities",
+    "desc": "HN front_page 技术信号，HN 82 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://www.reuters.com/world/china/anthropic-says-alibaba-illicitly-extracted-claude-ai-model-capabilities-2026-06-24/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p1782809284",
+    "date": "2026-06-25",
+    "round": 0,
+    "grade": "⚡",
+    "title": "LuaJIT 3.0 proposed syntax extensions",
+    "desc": "HN front_page 技术信号，HN 190 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/LuaJIT/LuaJIT/issues/1475",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pd0264f3749",
+    "date": "2026-06-26",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Show HN: OpenKnowledge – open source AI-first alternative to Obsidian/Notion",
+    "desc": "HN front_page 技术信号，HN 212 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/inkeep/open-knowledge",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pe96a6db580",
+    "date": "2026-06-26",
+    "round": 0,
+    "grade": "💡",
+    "title": "A game where you're an OS and have to manage processes, memory and I/O events",
+    "desc": "HN front_page 技术信号，HN 106 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/plbrault/youre-the-os",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "ped236230c3",
+    "date": "2026-06-26",
+    "round": 0,
+    "grade": "💡",
+    "title": "GloriousEggroll's Proton has been rebased on Proton 11",
+    "desc": "HN front_page 技术信号，HN 67 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/GloriousEggroll/proton-ge-custom/releases/tag/GE-Proton11-1",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p0fcff676a9",
+    "date": "2026-06-26",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Hey Nico, you didn't vibe code your data room but stole it from Papermark",
+    "desc": "HN front_page 技术信号，HN 296 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://twitter.com/mfts0/status/2070080422482977095",
+    "tags": [
+      "X/Twitter",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p5f74677fea",
+    "date": "2026-06-27",
+    "round": 0,
+    "grade": "🔥",
+    "title": "Previewing GPT‑5.6 Sol: a next-generation model",
+    "desc": "HN front_page 技术信号，HN 863 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://openai.com/index/previewing-gpt-5-6-sol/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pd958e6ef4d",
+    "date": "2026-06-27",
+    "round": 0,
+    "grade": "🔥",
+    "title": "U.S. government will decide who gets to use GPT-5.6",
+    "desc": "HN front_page 技术信号，HN 846 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://www.washingtonpost.com/technology/2026/06/26/openai-says-us-government-will-vet-users-its-latest-ai-model/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p8ed9e729cc",
+    "date": "2026-06-27",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Show HN: Smart model routing directly in Claude, Codex and Cursor",
+    "desc": "HN front_page 技术信号，HN 150 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/workweave/router",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p29210a20fc",
+    "date": "2026-06-27",
+    "round": 0,
+    "grade": "⚡",
+    "title": "The gap between open weights LLMs and closed source LLMs",
+    "desc": "HN front_page 技术信号，HN 127 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://blog.doubleword.ai/frontier-os-llm",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pbc8b654c19",
+    "date": "2026-06-27",
+    "round": 0,
+    "grade": "💡",
+    "title": "A C++ implementation of a fast hash map and hash set using hopscotch hashing",
+    "desc": "HN front_page 技术信号，HN 69 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/Tessil/hopscotch-map",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p2d0f46e1c5",
+    "date": "2026-06-27",
+    "round": 0,
+    "grade": "🔥",
+    "title": "DSpark: Speculative decoding accelerates LLM inference [pdf]",
+    "desc": "HN front_page 技术信号，HN 495 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/deepseek-ai/DeepSpec/blob/main/DSpark_paper.pdf",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p3c31f631a6",
+    "date": "2026-06-28",
+    "round": 0,
+    "grade": "🔥",
+    "title": "Anonymous GitHub account mass-dropping undisclosed 0-days",
+    "desc": "HN front_page 技术信号，HN 684 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/bikini/exploitarium",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pea862f8647",
+    "date": "2026-06-28",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Post-Mythos Cybersecurity: Keep calm and carry on",
+    "desc": "HN front_page 技术信号，HN 135 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://cephalosec.com/blog/cybersecurity-in-the-post-mythos-era-keep-calm-and-carry-on/",
+    "tags": [
+      "Agent",
+      "安全"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p2caaec7a48",
+    "date": "2026-06-28",
+    "round": 0,
+    "grade": "💡",
+    "title": "Show HN: Adrafinil – keep a lid-closed Mac awake only while agents work",
+    "desc": "HN front_page 技术信号，HN 93 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/kageroumado/adrafinil",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p4aaeaf4533",
+    "date": "2026-06-28",
+    "round": 0,
+    "grade": "💡",
+    "title": "AMD Strix Halo RDMA Cluster Setup Guide",
+    "desc": "HN front_page 技术信号，HN 38 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/kyuz0/amd-strix-halo-vllm-toolboxes/blob/main/rdma_cluster/setup_guide.md",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p5608750433",
+    "date": "2026-06-28",
+    "round": 0,
+    "grade": "💡",
+    "title": "Enhancing X11 Application Security with LXC (2025)",
+    "desc": "HN front_page 技术信号，HN 62 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://dobrowolski.dev/article/enhancing-x11-application-security-with-lxc/",
+    "tags": [
+      "Agent",
+      "安全"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p44a3821bb5",
+    "date": "2026-06-28",
+    "round": 0,
+    "grade": "💡",
+    "title": "Wayfinder Router: deterministic routing of queries between local and hosted LLM",
+    "desc": "HN front_page 技术信号，HN 86 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/itsthelore/wayfinder-router",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pfe9bc34c3e",
+    "date": "2026-06-28",
+    "round": 0,
+    "grade": "💡",
+    "title": "Bashblog – a single bash script to create blogs",
+    "desc": "HN front_page 技术信号，HN 72 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/cfenollosa/bashblog",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pa1fea0c793",
+    "date": "2026-06-29",
+    "round": 0,
+    "grade": "🔥",
+    "title": "GLM 5.2 beats Claude in our benchmarks",
+    "desc": "HN front_page 技术信号，HN 483 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://semgrep.dev/blog/2026/we-have-mythos-at-home-glm-52-beats-claude-in-our-cyber-benchmarks/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pe3578e28e8",
+    "date": "2026-06-29",
+    "round": 0,
+    "grade": "⚡",
+    "title": "I used Claude Code to get a second opinion on my MRI",
+    "desc": "HN front_page 技术信号，HN 358 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://antoine.fi/mri-analysis-using-claude-code-opus",
+    "tags": [
+      "Agent",
+      "CC工作流"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p0886e94e9e",
+    "date": "2026-06-29",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Librepods: AirPods liberated",
+    "desc": "HN front_page 技术信号，HN 291 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/librepods-org/librepods",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pf0f0b5c122",
+    "date": "2026-06-29",
+    "round": 0,
+    "grade": "⚡",
+    "title": "A way to exclude sensitive files issue still open for OpenAI Codex",
+    "desc": "HN front_page 技术信号，HN 179 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/openai/codex/issues/2847",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p6cad7f58d4",
+    "date": "2026-06-29",
+    "round": 0,
+    "grade": "💡",
+    "title": "Tokenmaxxing is dead, long live tokenmaxxing",
+    "desc": "HN front_page 技术信号，HN 115 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://12gramsofcarbon.com/p/agentics-tech-things-tokenmaxxing",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pd1d12f23b8",
+    "date": "2026-06-29",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Age verification is just a precursor to automated attribution of speech",
+    "desc": "HN front_page 技术信号，HN 325 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://nonogra.ph/age-verification-is-just-a-precursor-to-attribution-of-speech-06-29-2026",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pfdd8a60a3f",
+    "date": "2026-06-30",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Ornith-1.0: self-improving open-source models for agentic coding",
+    "desc": "HN front_page 技术信号，HN 161 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/deepreinforce-ai/Ornith-1",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p3743e976a7",
+    "date": "2026-06-30",
+    "round": 0,
+    "grade": "💡",
+    "title": "Ornith-1.0: Self-scaffolding LLMs for agentic coding",
+    "desc": "HN front_page 技术信号，HN 58 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://deep-reinforce.com/ornith_1_0.html",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pb4bb3683a7",
+    "date": "2026-06-30",
+    "round": 0,
+    "grade": "💡",
+    "title": "Linux for the Sega MegaDrive",
+    "desc": "HN front_page 技术信号，HN 82 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/LinuxMD/linuxmd",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p0b2c75fe1f",
+    "date": "2026-06-30",
+    "round": 0,
+    "grade": "💡",
+    "title": "Kb – Prolog Knowledge Base",
+    "desc": "HN front_page 技术信号，HN 67 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/mat-mgm/kb-prolog",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p974bf5f0a9",
+    "date": "2026-07-01",
+    "round": 0,
+    "grade": "🔥",
+    "title": "Claude Code is steganographically marking requests",
+    "desc": "HN front_page 技术信号，HN 1429 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://thereallo.dev/blog/claude-code-prompt-steganography",
+    "tags": [
+      "Agent",
+      "CC工作流"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pca478df291",
+    "date": "2026-07-01",
+    "round": 0,
+    "grade": "🔥",
+    "title": "Claude Sonnet 5",
+    "desc": "HN front_page 技术信号，HN 889 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://www.anthropic.com/news/claude-sonnet-5",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p6ec14e9b9a",
+    "date": "2026-07-01",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Claude Science",
+    "desc": "HN front_page 技术信号，HN 371 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://claude.com/product/claude-science",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p1d0f0139a9",
+    "date": "2026-07-01",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Department of Commerce has lifted export controls on Claude Fable 5 and Mythos 5",
+    "desc": "HN front_page 技术信号，HN 232 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://twitter.com/AnthropicAI/status/2072106151890809341",
+    "tags": [
+      "X/Twitter",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p91aaf7c189",
+    "date": "2026-07-01",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Google copybara: moving code between repositories",
+    "desc": "HN front_page 技术信号，HN 182 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/google/copybara",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pd815339033",
+    "date": "2026-07-01",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Godot will no longer accept AI-authored code contributions",
+    "desc": "HN front_page 技术信号，HN 372 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://www.pcgamer.com/gaming-industry/open-source-game-engine-godot-will-no-longer-accept-ai-authored-code-contributions-we-cant-trust-heavy-users-of-ai-to-understand-their-code-enough-to-fix-it/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p90049ecd77",
+    "date": "2026-07-02",
+    "round": 0,
+    "grade": "💡",
+    "title": "Opening up 'Zero-Knowledge Proof' technology to promote privacy in age assurance",
+    "desc": "HN front_page 技术信号，HN 116 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://blog.google/innovation-and-ai/technology/safety-security/opening-up-zero-knowledge-proof-technology-to-promote-privacy-in-age-assurance/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p88df17a05a",
+    "date": "2026-07-02",
+    "round": 0,
+    "grade": "💡",
+    "title": "Qualcomm Linux 2.0",
+    "desc": "HN front_page 技术信号，HN 85 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://www.qualcomm.com/developer/blog/2026/06/qualcomm-linux-2-now-available",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pb1e8c261e5",
+    "date": "2026-07-02",
+    "round": 0,
+    "grade": "🔥",
+    "title": "Android Developer Verification: Threat masquerading as Protection",
+    "desc": "HN front_page 技术信号，HN 964 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://f-droid.org/2026/07/01/adv-malware.html",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p7a584600be",
+    "date": "2026-07-02",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Kimi K2.7 Code is generally available in GitHub Copilot",
+    "desc": "HN front_page 技术信号，HN 246 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.blog/changelog/2026-07-01-kimi-k2-7-is-now-available-in-github-copilot/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pa440e5071e",
+    "date": "2026-07-03",
+    "round": 0,
+    "grade": "🔥",
+    "title": "Virginia bans sale of geolocation data",
+    "desc": "HN front_page 技术信号，HN 531 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://www.hunton.com/privacy-and-cybersecurity-law-blog/virginia-bans-sale-of-geolocation-data",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p2dfccc5560",
+    "date": "2026-07-03",
+    "round": 0,
+    "grade": "🔥",
+    "title": "PeerTube is a free, decentralized and federated video platform",
+    "desc": "HN front_page 技术信号，HN 526 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/Chocobozzz/PeerTube",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p416d1ac5fd",
+    "date": "2026-07-03",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Immich 3.0",
+    "desc": "HN front_page 技术信号，HN 211 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/immich-app/immich/discussions/29439",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p157428efc9",
+    "date": "2026-07-03",
+    "round": 0,
+    "grade": "⚡",
+    "title": "crustc: entirety of `rustc`, translated to C",
+    "desc": "HN front_page 技术信号，HN 146 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/FractalFir/crustc",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p7e0632162f",
+    "date": "2026-07-03",
+    "round": 0,
+    "grade": "💡",
+    "title": "Launch HN: Manufact (YC S25) – MCP Cloud",
+    "desc": "HN front_page 技术信号，HN 102 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://manufact.com",
+    "tags": [
+      "MCP",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pb31e3224ee",
+    "date": "2026-07-03",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Claude-real-video － any LLM can watch a video",
+    "desc": "HN front_page 技术信号，HN 128 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/HUANGCHIHHUNGLeo/claude-real-video",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pac39b75e42",
+    "date": "2026-07-03",
+    "round": 0,
+    "grade": "💡",
+    "title": "The short leash AI coding method for beating Fable",
+    "desc": "HN front_page 技术信号，HN 117 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://blog.okturtles.org/2026/07/short-leash-ai-method/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pa06f39f3a3",
+    "date": "2026-07-03",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Alibaba to ban Claude Code in workplace over alleged backdoor risks, source says",
+    "desc": "HN front_page 技术信号，HN 201 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://www.reuters.com/world/china/alibaba-ban-claude-code-workplace-over-alleged-backdoor-risks-source-says-2026-07-03/",
+    "tags": [
+      "Agent",
+      "CC工作流"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p5f01584feb",
+    "date": "2026-07-04",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Jamesob's guide to running SOTA LLMs locally",
+    "desc": "HN front_page 技术信号，HN 286 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/jamesob/local-llm",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pe331846eaa",
+    "date": "2026-07-04",
+    "round": 0,
+    "grade": "⚡",
+    "title": "SearXNG: A free internet metasearch engine",
+    "desc": "HN front_page 技术信号，HN 138 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/searxng/searxng",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pefc0c4b3ce",
+    "date": "2026-07-04",
+    "round": 0,
+    "grade": "💡",
+    "title": "Steam Controller Auto-Charge – pilot to magnetic charging puck using CV",
+    "desc": "HN front_page 技术信号，HN 74 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/FossPrime/Steam-Controller-Auto-Charge",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p1d76b478e5",
+    "date": "2026-07-04",
+    "round": 0,
+    "grade": "💡",
+    "title": "New serious vulnerabilities spiked around release of Claude Mythos Preview",
+    "desc": "HN front_page 技术信号，HN 52 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://epoch.ai/data-insights/cve-severity-spike",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p20bed6df2c",
+    "date": "2026-07-04",
+    "round": 0,
+    "grade": "💡",
+    "title": "Agentic coding notes from Galapagos Island",
+    "desc": "HN front_page 技术信号，HN 60 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://danluu.com/ai-coding/#appendix-agentic-loops-and-writing-this-post",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pba188887f8",
+    "date": "2026-07-05",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Command and Conquer Generals natively ported to macOS, iPhone, iPad using Fable",
+    "desc": "HN front_page 技术信号，HN 365 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/ammaarreshi/Generals-Mac-iOS-iPad/tree/main",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pd8ccbee464",
+    "date": "2026-07-05",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Potential session/cache leakage between workspace instances or consumer accounts",
+    "desc": "HN front_page 技术信号，HN 275 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/anthropics/claude-code/issues/74066",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p750daf41b4",
+    "date": "2026-07-05",
+    "round": 0,
+    "grade": "⚡",
+    "title": "GPT-5.5 Codex reasoning-token clustering may be leading to degraded performance",
+    "desc": "HN front_page 技术信号，HN 153 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/openai/codex/issues/30364",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pc09b078295",
+    "date": "2026-07-05",
+    "round": 0,
+    "grade": "💡",
+    "title": "Better Models: Worse Tools",
+    "desc": "HN front_page 技术信号，HN 98 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://lucumr.pocoo.org/2026/7/4/better-models-worse-tools/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pf08e58a5da",
+    "date": "2026-07-05",
+    "round": 0,
+    "grade": "💡",
+    "title": "Windows CE Dreamcast Community Edition (wince-dc)",
+    "desc": "HN front_page 技术信号，HN 95 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/maximqaxd/wince-dc",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pc5adc96cd9",
+    "date": "2026-07-05",
+    "round": 0,
+    "grade": "💡",
+    "title": "The Log is the Agent",
+    "desc": "HN front_page 技术信号，HN 65 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://arxiv.org/abs/2605.21997",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p2f0257b17c",
+    "date": "2026-07-05",
+    "round": 0,
+    "grade": "💡",
+    "title": "Claude Design System Prompt",
+    "desc": "HN front_page 技术信号，HN 65 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/Trystan-SA/claude-design-system-prompt",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p4f797b2139",
+    "date": "2026-07-06",
+    "round": 0,
+    "grade": "💡",
+    "title": "Zuckerberg says AI agent development going slower than expected",
+    "desc": "HN front_page 技术信号，HN 99 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://www.reuters.com/business/zuckerberg-says-ai-agent-development-going-slower-than-expected-2026-07-02/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p0668801baf",
+    "date": "2026-07-06",
+    "round": 0,
+    "grade": "💡",
+    "title": "Does code cleanliness affect coding agents? A controlled minimal-pair study",
+    "desc": "HN front_page 技术信号，HN 102 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://arxiv.org/abs/2605.20049",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pd594ec3861",
+    "date": "2026-07-06",
+    "round": 0,
+    "grade": "💡",
+    "title": "The Hitchhiker's Guide to Agentic AI",
+    "desc": "HN front_page 技术信号，HN 22 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://arxiv.org/abs/2606.24937",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "ped2d94337b",
+    "date": "2026-07-06",
+    "round": 0,
+    "grade": "💡",
+    "title": "Modernizing a 25-year-old minimal C++ unit testing framework (Part 2)",
+    "desc": "HN front_page 技术信号，HN 21 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://freshsources.com/code-capsules/test-part2/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pa8b7ec1e57",
+    "date": "2026-07-07",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Fable turned reMarkable into Tom Riddle's diary from Harry Potter",
+    "desc": "HN front_page 技术信号，HN 172 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/MaximeRivest/Riddle",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pb9c4f2c9fd",
+    "date": "2026-07-07",
+    "round": 0,
+    "grade": "⚡",
+    "title": "OfficeCLI: Office suite for AI agents to read and edit Microsoft Office files",
+    "desc": "HN front_page 技术信号，HN 128 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/iOfficeAI/OfficeCLI",
+    "tags": [
+      "GitHub",
+      "Agent",
+      "终端工具"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pf4c66df323",
+    "date": "2026-07-07",
+    "round": 0,
+    "grade": "💡",
+    "title": "Learning to code is still worthwhile",
+    "desc": "HN front_page 技术信号，HN 111 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://stevekrouse.com/learn-to-code",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pdf852cc7d7",
+    "date": "2026-07-07",
+    "round": 0,
+    "grade": "💡",
+    "title": "Januscape: Guest-to-Host Escape in KVM/x86 [CVE-2026-53359]",
+    "desc": "HN front_page 技术信号，HN 80 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/V4bel/Januscape",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p77076f7626",
+    "date": "2026-07-07",
+    "round": 0,
+    "grade": "💡",
+    "title": "Full Writeup of the Windows GDID",
+    "desc": "HN front_page 技术信号，HN 43 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/SmtimesIWndr/gdid-reversal",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p94241391aa",
+    "date": "2026-07-08",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Jim's TrueType QR Code Font",
+    "desc": "HN front_page 技术信号，HN 165 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/jimparis/qr-font",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pec72e0f1cc",
+    "date": "2026-07-08",
+    "round": 0,
+    "grade": "⚡",
+    "title": "We're extending access to Fable 5 on all paid plans through July 12",
+    "desc": "HN front_page 技术信号，HN 154 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://twitter.com/claudeai/status/2074548242386178258",
+    "tags": [
+      "X/Twitter",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pe86e54f33d",
+    "date": "2026-07-08",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Show HN: Rowboat – Open-source, local-first alternative to Claude Desktop",
+    "desc": "HN front_page 技术信号，HN 142 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/rowboatlabs/rowboat",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p155cf2dc6e",
+    "date": "2026-07-08",
+    "round": 0,
+    "grade": "⚡",
+    "title": "GPT-5.6 Sol, along with Terra and Luna, will launch publicly this Thursday",
+    "desc": "HN front_page 技术信号，HN 120 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://twitter.com/OpenAI/status/2074704958419792299",
+    "tags": [
+      "X/Twitter",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pca15b2b774",
+    "date": "2026-07-08",
+    "round": 0,
+    "grade": "⚡",
+    "title": "GitLost: We Tricked GitHub's AI Agent into Leaking Private Repos",
+    "desc": "HN front_page 技术信号，HN 316 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://noma.security/blog/gitlost-how-we-tricked-githubs-ai-agent-into-leaking-private-repos/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p01f5e1865c",
+    "date": "2026-07-09",
+    "round": 0,
+    "grade": "🔥",
+    "title": "GPT‑Live",
+    "desc": "HN front_page 技术信号，HN 606 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://openai.com/index/introducing-gpt-live/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p556d142aef",
+    "date": "2026-07-09",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Show HN: Microsoft releases Flint, a visualization language for AI agents",
+    "desc": "HN front_page 技术信号，HN 212 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://microsoft.github.io/flint-chart/#/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pd0ef5a2367",
+    "date": "2026-07-09",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Separating signal from noise in coding evaluations",
+    "desc": "HN front_page 技术信号，HN 165 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://openai.com/index/separating-signal-from-noise-coding-evaluations/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p487a099493",
+    "date": "2026-07-09",
+    "round": 0,
+    "grade": "💡",
+    "title": "Turning a pile of documents into a searchable useable knowledge base",
+    "desc": "HN front_page 技术信号，HN 84 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/linuxrebel/DocuBrowser",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pe3286fd81d",
+    "date": "2026-07-09",
+    "round": 0,
+    "grade": "💡",
+    "title": "We made Grok 4.5, GPT-5.5, and Claude build the same apps",
+    "desc": "HN front_page 技术信号，HN 74 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://www.tryai.dev/blog/grok-4.5-vs-gpt-5.5-vs-claude-build-off",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pd67054ad6e",
+    "date": "2026-07-09",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Why developers are ditching GitHub for Codeberg and self-hosting alternatives",
+    "desc": "HN front_page 技术信号，HN 252 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://www.howtogeek.com/why-developers-are-ditching-github-for-codeberg-and-self-hosting-alternatives/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "paf9530ef53",
+    "date": "2026-07-09",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Benchmarking coding agents on Databricks' multi-million line codebase",
+    "desc": "HN front_page 技术信号，HN 127 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://www.databricks.com/blog/benchmarking-coding-agents-databricks-multi-million-line-codebase",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p2e1cb331e2",
+    "date": "2026-07-10",
+    "round": 0,
+    "grade": "🔥",
+    "title": "GPT-5.6",
+    "desc": "HN front_page 技术信号，HN 1083 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://openai.com/index/gpt-5-6/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p9064d2fb23",
+    "date": "2026-07-10",
+    "round": 0,
+    "grade": "🔥",
+    "title": "Show HN: Getting GLM 5.2 running on my slow computer",
+    "desc": "HN front_page 技术信号，HN 413 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/JustVugg/colibri",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p3996759b6b",
+    "date": "2026-07-10",
+    "round": 0,
+    "grade": "🔥",
+    "title": "Postgres rewritten in Rust, now passing 100% of the Postgres regression tests",
+    "desc": "HN front_page 技术信号，HN 404 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/malisper/pgrust",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p1ecd5f9b6b",
+    "date": "2026-07-11",
+    "round": 0,
+    "grade": "🔥",
+    "title": "Apple sues OpenAI, accuses ex-employees of stealing trade secrets",
+    "desc": "HN front_page 技术信号，HN 595 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://9to5mac.com/2026/07/10/apple-sues-openai-trade-secret-theft/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p2c04815563",
+    "date": "2026-07-11",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Good Tools Are Invisible",
+    "desc": "HN front_page 技术信号，HN 365 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://www.gingerbill.org/article/2026/07/10/good-tools-are-invisible/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pc9c76748f7",
+    "date": "2026-07-11",
+    "round": 0,
+    "grade": "⚡",
+    "title": "GPT-5.6 Sol Ultra produces proof of the Cycle Double Cover Conjecture [pdf]",
+    "desc": "HN front_page 技术信号，HN 358 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://cdn.openai.com/pdf/04d1d1e4-bc75-476a-97cf-49055cd98d31/cdc_proof.pdf",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p0bb4a99cee",
+    "date": "2026-07-12",
+    "round": 0,
+    "grade": "💡",
+    "title": "Mesh LLM: distributed AI computing on iroh",
+    "desc": "HN front_page 技术信号，HN 105 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://www.iroh.computer/blog/mesh-llm",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p4aad2dbe5b",
+    "date": "2026-07-12",
+    "round": 0,
+    "grade": "💡",
+    "title": "Biff.graph: structure your Clojure codebase as a queryable graph",
+    "desc": "HN front_page 技术信号，HN 89 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/jacobobryant/biff/tree/v2.x/libs/graph",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p8307ba314e",
+    "date": "2026-07-12",
+    "round": 0,
+    "grade": "💡",
+    "title": "RISCBoy is an open-source portable games console, designed from scratch",
+    "desc": "HN front_page 技术信号，HN 66 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/Wren6991/RISCBoy",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p3d3953655c",
+    "date": "2026-07-12",
+    "round": 0,
+    "grade": "💡",
+    "title": "Show HN: Reame – a CPU inference server that gets faster as it runs",
+    "desc": "HN front_page 技术信号，HN 43 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/swellweb/reame",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p6b26b00428",
+    "date": "2026-07-12",
+    "round": 0,
+    "grade": "💡",
+    "title": "An agent in 100 lines of Lisp",
+    "desc": "HN front_page 技术信号，HN 119 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://thebeach.dev/posts/lisp-agent/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pd80e0db2fa",
+    "date": "2026-07-12",
+    "round": 0,
+    "grade": "💡",
+    "title": "A pure scheme web programming tool",
+    "desc": "HN front_page 技术信号，HN 81 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://goeteia.dev",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p5fb6da37ba",
+    "date": "2026-07-12",
+    "round": 0,
+    "grade": "💡",
+    "title": "Old and new apps, via modern coding agents by Terry Tao",
+    "desc": "HN front_page 技术信号，HN 112 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://terrytao.wordpress.com/2026/07/11/old-and-new-apps-via-modern-coding-agents/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p2d727fac53",
+    "date": "2026-07-12",
+    "round": 0,
+    "grade": "💡",
+    "title": "Show HN: Mindwalk – Replay coding-agent sessions on a 3D map of your codebase",
+    "desc": "HN front_page 技术信号，HN 99 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/cosmtrek/mindwalk",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p54db5825e5",
+    "date": "2026-07-13",
+    "round": 0,
+    "grade": "🔥",
+    "title": "Claude Code sends 33k tokens before reading the prompt; OpenCode sends 7k",
+    "desc": "HN front_page 技术信号，HN 475 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://systima.ai/blog/claude-code-vs-opencode-token-overhead",
+    "tags": [
+      "Agent",
+      "CC工作流"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pb05841ffc0",
+    "date": "2026-07-13",
+    "round": 0,
+    "grade": "⚡",
+    "title": "I love LLMs, I hate hype",
+    "desc": "HN front_page 技术信号，HN 333 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://geohot.github.io//blog/jekyll/update/2026/07/12/i-love-llms.html",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p723efba395",
+    "date": "2026-07-13",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Migrating a production AI agent to GPT-5.6: 2.2x faster, 27% cheaper",
+    "desc": "HN front_page 技术信号，HN 145 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://ploy.ai/blog/migrating-a-production-ai-agent-to-gpt-5-6",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p9ab6097724",
+    "date": "2026-07-13",
+    "round": 0,
+    "grade": "💡",
+    "title": "Why write code in 2026",
+    "desc": "HN front_page 技术信号，HN 117 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://softwaredoug.com/blog/2026/07/09/write-code",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p91a0cbd84d",
+    "date": "2026-07-13",
+    "round": 0,
+    "grade": "🔥",
+    "title": "What xAI's Grok build CLI sends to xAI: A wire-level analysis",
+    "desc": "HN front_page 技术信号，HN 461 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://gist.github.com/cereblab/dc9a40bc26120f4540e4e09b75ffb547",
+    "tags": [
+      "GitHub",
+      "Agent",
+      "终端工具"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "peee0c1492e",
+    "date": "2026-07-13",
+    "round": 0,
+    "grade": "💡",
+    "title": "Mechanistic interpretability researchers applying causality theory to LLMs",
+    "desc": "HN front_page 技术信号，HN 95 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://cacm.acm.org/news/can-we-understand-how-large-language-models-reason/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pd1912a7080",
+    "date": "2026-07-14",
+    "round": 0,
+    "grade": "💡",
+    "title": "Show HN: YouTube Guitar Tab Parser",
+    "desc": "HN front_page 技术信号，HN 77 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/marcelpanse/youtube-guitar-tab-parser",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p6e7c64a2e7",
+    "date": "2026-07-14",
+    "round": 0,
+    "grade": "💡",
+    "title": "Show HN: I implemented a neural network in SQL",
+    "desc": "HN front_page 技术信号，HN 62 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/xqlsystems/xarray-sql/blob/claude/xarray-sql-mnist-demo/benchmarks/nn.py",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pf3b227e484",
+    "date": "2026-07-14",
+    "round": 0,
+    "grade": "💡",
+    "title": "Show HN: Jacquard, a programming language for AI-written, human-reviewed code",
+    "desc": "HN front_page 技术信号，HN 55 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/jbwinters/jacquard-lang",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p6fbbda2079",
+    "date": "2026-07-14",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Codex starts encrypting sub-agent prompts",
+    "desc": "HN front_page 技术信号，HN 206 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/openai/codex/issues/28058",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "peb62125250",
+    "date": "2026-07-14",
+    "round": 0,
+    "grade": "⚡",
+    "title": "YouTrackDB is a general-use object-oriented graph database",
+    "desc": "HN front_page 技术信号，HN 148 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/JetBrains/youtrackdb",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p194304989a",
+    "date": "2026-07-15",
+    "round": 0,
+    "grade": "🔥",
+    "title": "How to stop Claude from saying load-bearing",
+    "desc": "HN front_page 技术信号，HN 442 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://jola.dev/posts/how-to-stop-claude-from-saying-load-bearing",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p780a865c18",
+    "date": "2026-07-15",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Cursor 0day: When Full Disclosure Becomes the Only Protection Left",
+    "desc": "HN front_page 技术信号，HN 264 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://mindgard.ai/blog/cursor-0day-when-full-disclosure-becomes-the-only-protection-left",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pdfcc7b5062",
+    "date": "2026-07-15",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Show HN: Juggler – an open-source GUI coding agent, by the creator of JUCE",
+    "desc": "HN front_page 技术信号，HN 185 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/juggler-ai/juggler",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p265e046a4a",
+    "date": "2026-07-15",
+    "round": 0,
+    "grade": "💡",
+    "title": "The zero-cost fallacy: open-source software in the agentic era",
+    "desc": "HN front_page 技术信号，HN 111 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://www.thoughtworks.com/insights/blog/open-source/zero-cost-fallacy-open-source-agentic-era",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p300b3ccc12",
+    "date": "2026-07-15",
+    "round": 0,
+    "grade": "💡",
+    "title": "Guardian Angels: LLM Personalization for Productivity and Security",
+    "desc": "HN front_page 技术信号，HN 59 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://gwern.net/guardian-angel",
+    "tags": [
+      "Agent",
+      "安全"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pd9c4023e39",
+    "date": "2026-07-15",
+    "round": 0,
+    "grade": "⚡",
+    "title": "TS-2026-009: Insecure argument handling in Tailscale SSH permitted root access",
+    "desc": "HN front_page 技术信号，HN 128 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://tailscale.com/security-bulletins",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p76a486f102",
+    "date": "2026-07-15",
+    "round": 0,
+    "grade": "💡",
+    "title": "Microsoft Patches a Record 570 Security Flaws",
+    "desc": "HN front_page 技术信号，HN 102 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://krebsonsecurity.com/2026/07/microsoft-patches-a-record-570-security-flaws/",
+    "tags": [
+      "Agent",
+      "安全"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p98ccccbcd4",
+    "date": "2026-07-15",
+    "round": 0,
+    "grade": "💡",
+    "title": "DSLs Enable Reliable Use of LLMs",
+    "desc": "HN front_page 技术信号，HN 59 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://martinfowler.com/articles/llm-and-dsls.html",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p9905ab2e0e",
+    "date": "2026-07-15",
+    "round": 0,
+    "grade": "💡",
+    "title": "Neverclick: Desktop application for performing mouse actions with your keyboard",
+    "desc": "HN front_page 技术信号，HN 33 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/LazoVelko/neverclick",
+    "tags": [
+      "GitHub",
+      "Agent",
+      "终端工具"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p4bab93b31e",
+    "date": "2026-07-15",
+    "round": 0,
+    "grade": "💡",
+    "title": "Weathergotchi – an open-source climate Tamagotchi",
+    "desc": "HN front_page 技术信号，HN 33 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/Michael-Manning/E-Paper-Climate-Logger",
+    "tags": [
+      "GitHub",
+      "Agent",
+      "终端工具"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p8b0ae9542b",
+    "date": "2026-07-16",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Grok Build is open source",
+    "desc": "HN front_page 技术信号，HN 287 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/xai-org/grok-build",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p7f919597d9",
+    "date": "2026-07-16",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Show HN: Firefox in WebAssembly",
+    "desc": "HN front_page 技术信号，HN 142 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://developer.puter.com/labs/firefox-wasm/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p5a871def41",
+    "date": "2026-07-16",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Show HN: misa77 - a codec that decodes 2x faster than LZ4 (at better ratios)",
+    "desc": "HN front_page 技术信号，HN 132 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/welcome-to-the-sunny-side/misa77",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pdd2d8791d7",
+    "date": "2026-07-16",
+    "round": 0,
+    "grade": "💡",
+    "title": "Brainless: Shadcn components that look like Claude Code, Codex and Grok",
+    "desc": "HN front_page 技术信号，HN 98 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://brainless.swerdlow.dev",
+    "tags": [
+      "Agent",
+      "CC工作流"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p3e076e85af",
+    "date": "2026-07-16",
+    "round": 0,
+    "grade": "💡",
+    "title": "Designing APIs for Agents",
+    "desc": "HN front_page 技术信号，HN 55 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://www.freestyle.sh/blog/opinion/designing-apis-for-agents",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p130fdd9b81",
+    "date": "2026-07-16",
+    "round": 0,
+    "grade": "💡",
+    "title": "LLM Networking with MikroTik",
+    "desc": "HN front_page 技术信号，HN 80 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://blog.greg.technology/2026/07/14/llm-networking-with-mikrotik.html",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p9caf5fce7a",
+    "date": "2026-07-16",
+    "round": 0,
+    "grade": "💡",
+    "title": "Stop saying that AI is just a tool and it only matters how it is used",
+    "desc": "HN front_page 技术信号，HN 67 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://www.frank.computer/blog/2025/05/just-a-tool.html",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p7816f021d8",
+    "date": "2026-07-16",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Where are YC founders now? OpenAI and Anthropic, mostly",
+    "desc": "HN front_page 技术信号，HN 140 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://joinedanthropic.com",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p4dd4e60faf",
+    "date": "2026-07-16",
+    "round": 0,
+    "grade": "💡",
+    "title": "Reynard: A real Firefox web browser for iOS 13 or later",
+    "desc": "HN front_page 技术信号，HN 92 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/minh-ton/reynard-browser",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p4dbf83681c",
+    "date": "2026-07-16",
+    "round": 0,
+    "grade": "💡",
+    "title": "Can LLMs Perform Deep Technical Comprehension of Computer Architecture Papers",
+    "desc": "HN front_page 技术信号，HN 72 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://arxiv.org/abs/2607.11859",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p8a43023903",
+    "date": "2026-07-16",
+    "round": 0,
+    "grade": "💡",
+    "title": "The LLM Critics Are Right. I Use LLMs Anyway",
+    "desc": "HN front_page 技术信号，HN 68 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://www.theocharis.dev/blog/llm-critics-are-right-i-use-llms-anyway/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p441fd272e4",
+    "date": "2026-07-17",
+    "round": 0,
+    "grade": "⚡",
+    "title": "LM Studio Bionic: the AI agent for open models",
+    "desc": "HN front_page 技术信号，HN 167 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://lmstudio.ai/blog/introducing-lm-studio-bionic",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pd560cdb5bd",
+    "date": "2026-07-17",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Detecting LLM-Generated Texts with “Classical” Machine Learning",
+    "desc": "HN front_page 技术信号，HN 162 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://blog.lyc8503.net/en/post/llm-classifier/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pd4c0d459d9",
+    "date": "2026-07-17",
+    "round": 0,
+    "grade": "⚡",
+    "title": "$100 AI Music Video: Claude Fable 5 vs. GPT-5.6 Sol",
+    "desc": "HN front_page 技术信号，HN 146 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://www.tryai.dev/blog/ai-music-video-arena-claude-vs-gpt-5.6",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p82c41e3e15",
+    "date": "2026-07-17",
+    "round": 0,
+    "grade": "💡",
+    "title": "Show HN: Clx – Compile Lua to Native Executables Through C++20",
+    "desc": "HN front_page 技术信号，HN 88 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/samyeyo/clx",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pea1da62551",
+    "date": "2026-07-17",
+    "round": 0,
+    "grade": "💡",
+    "title": "The Little Book of Reinforcement Learning",
+    "desc": "HN front_page 技术信号，HN 62 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/alxndrTL/little-book-rl/",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p78871cab80",
+    "date": "2026-07-18",
+    "round": 0,
+    "grade": "💡",
+    "title": "TP-Link Kasa cameras leaked home GPS via unauthenticated UDP for 6 years",
+    "desc": "HN front_page 技术信号，HN 102 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/BadChemical/IoT-Vulnerability-Research-Public/blob/main/TP-Link_Kasa_EC71/Kasa_EC71.md",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pe368a5c724",
+    "date": "2026-07-19",
+    "round": 0,
+    "grade": "🔥",
+    "title": "GPT-5.6 used a prompt to close a 30-year gap in convex optimization",
+    "desc": "HN front_page 技术信号，HN 509 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://old.reddit.com/r/math/comments/1uxj3cy/after_openais_cdc_proof_announcement_gpt56_used_a/",
+    "tags": [
+      "Reddit",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p6257caafab",
+    "date": "2026-07-19",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Speech Recognition and TTS in less than 500kb",
+    "desc": "HN front_page 技术信号，HN 292 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/moonshine-ai/moonshine/tree/main/micro",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p851e396e18",
+    "date": "2026-07-19",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Setting up your spare Mac for Claude Code to control, a step-by-step guide",
+    "desc": "HN front_page 技术信号，HN 179 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://ykdojo.github.io/claude-controls-mac/",
+    "tags": [
+      "Agent",
+      "CC工作流"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p02a4550916",
+    "date": "2026-07-19",
+    "round": 0,
+    "grade": "💡",
+    "title": "How GitHub gave every repository a durable owner",
+    "desc": "HN front_page 技术信号，HN 69 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.blog/security/application-security/how-github-gave-every-repository-a-durable-owner/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pb64f7ba399",
+    "date": "2026-07-19",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Better and Cheaper Than IPTV",
+    "desc": "HN front_page 技术信号，HN 150 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/stupside/castor",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p4d6849003a",
+    "date": "2026-07-21",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Agent swarms and the new model economics",
+    "desc": "HN front_page 技术信号，HN 170 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://cursor.com/blog/agent-swarm-model-economics",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p4f192bc7a5",
+    "date": "2026-07-21",
+    "round": 0,
+    "grade": "💡",
+    "title": "Incremental – A library for incremental computations",
+    "desc": "HN front_page 技术信号，HN 94 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/janestreet/incremental",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p0f1c868b5a",
+    "date": "2026-07-21",
+    "round": 0,
+    "grade": "🔥",
+    "title": "Claude Fable produced a counterexample to the Jacobian Conjecture",
+    "desc": "HN front_page 技术信号，HN 733 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://xcancel.com/__alpoge__/status/2079028340955197566",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p3fbf3b6a57",
+    "date": "2026-07-22",
+    "round": 0,
+    "grade": "🔥",
+    "title": "OpenAI and Hugging Face address security incident during model evaluation",
+    "desc": "HN front_page 技术信号，HN 747 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://openai.com/index/hugging-face-model-evaluation-security-incident/",
+    "tags": [
+      "Agent",
+      "安全"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p0dfc0164c7",
+    "date": "2026-07-22",
+    "round": 0,
+    "grade": "⚡",
+    "title": "'VPNs are lawful technical tools,' says EU Court in landmark copyright ruling",
+    "desc": "HN front_page 技术信号，HN 398 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://www.techradar.com/vpn/vpn-privacy-security/vpns-are-lawful-technical-tools-says-eu-court-in-landmark-anne-frank-copyright-ruling",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p6b1fb9bc88",
+    "date": "2026-07-22",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Advertise in ChatGPT",
+    "desc": "HN front_page 技术信号，HN 327 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://ads.openai.com/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p4bcf528f26",
+    "date": "2026-07-22",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Jack Dorsey launches Buzz to combine team chat, AI agents and Git hosting",
+    "desc": "HN front_page 技术信号，HN 252 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://runtimewire.com/article/jack-dorsey-block-buzz-team-chat-ai-agents-git",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p41ae5b9990",
+    "date": "2026-07-22",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Judge approves $1.5B Anthropic settlement for pirated books used to train Claude",
+    "desc": "HN front_page 技术信号，HN 146 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://apnews.com/article/ai-anthropic-copyright-settlement-claude-books-bartz-74b140444023898aeba8579b6e9f0d63",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pd91c969762",
+    "date": "2026-07-22",
+    "round": 0,
+    "grade": "⚡",
+    "title": "\"Drawing\" the Mona Lisa with GPT-5.6, Claude, Gemini, and Grok",
+    "desc": "HN front_page 技术信号，HN 227 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://www.tryai.dev/blog/ai-drawing-arena-colored-pencils-claude-gpt-grok",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p54c738c5a2",
+    "date": "2026-07-23",
+    "round": 0,
+    "grade": "⚡",
+    "title": "GigaToken: ~1000x faster Language model tokenization",
+    "desc": "HN front_page 技术信号，HN 381 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/marcelroed/gigatoken/",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p60831f44df",
+    "date": "2026-07-23",
+    "round": 0,
+    "grade": "💡",
+    "title": "Show HN: Cactus Hybrid: We taught Gemma 4 to know when it's wrong",
+    "desc": "HN front_page 技术信号，HN 76 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/cactus-compute/cactus-hybrid",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pd79963e506",
+    "date": "2026-07-23",
+    "round": 0,
+    "grade": "💡",
+    "title": "Petals: Run LLMs at home, BitTorrent-style",
+    "desc": "HN front_page 技术信号，HN 101 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://petals.dev/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p03b06f6765",
+    "date": "2026-07-23",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Protecting our FLOSS commons from LLMs",
+    "desc": "HN front_page 技术信号，HN 122 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://blog.codeberg.org/protecting-our-floss-commons-from-llms.html",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p5118b37bb7",
+    "date": "2026-07-24",
+    "round": 0,
+    "grade": "⚡",
+    "title": "OpenAI’s accidental attack against Hugging Face is science fiction that happened",
+    "desc": "HN front_page 技术信号，HN 397 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://simonwillison.net/2026/Jul/22/openai-cyberattack/",
+    "tags": [
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p8c9d09ceff",
+    "date": "2026-07-24",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Why Software Factories Fail (or: harness engineering is not enough)",
+    "desc": "HN front_page 技术信号，HN 187 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/humanlayer/advanced-context-engineering-for-coding-agents/blob/main/wsff.md",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "p0f8647fd53",
+    "date": "2026-07-24",
+    "round": 0,
+    "grade": "⚡",
+    "title": "Show HN: Palmier Pro – Open-source macOS video editor built for AI",
+    "desc": "HN front_page 技术信号，HN 125 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/palmier-io/palmier-pro",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
+  },
+  {
+    "id": "pdad2a77146",
+    "date": "2026-07-24",
+    "round": 0,
+    "grade": "💡",
+    "title": "Show HN: Claude-thermos keeps your Claude session warm for you",
+    "desc": "HN front_page 技术信号，HN 76 points",
+    "why": "HN front_page 原生采集命中 Radar 关注词；进入本轮候选，供后续人工/Agent 复核。",
+    "url": "https://github.com/izeigerman/claude-thermos",
+    "tags": [
+      "GitHub",
+      "Agent"
+    ],
+    "extra": [],
+    "alex_reply": "待观察"
   }
 ];
 
@@ -2576,6 +6920,7 @@ const setS = (id, st) => { S[id] = { [SF]: st }; localStorage.setItem(SK, JSON.s
 
 // ─── Filter ─────────────────────────────────────────────────────────────────
 let curFilter = 'all', curCat = '', curQ = '';
+let catExpanded = false;
 const FALLBACK_GRADE = C.grades.find(g => g.fallback) || C.grades[C.grades.length - 1];
 const gradeOf = d => C.grades.find(g => g.emoji === d.grade) || FALLBACK_GRADE;
 const catsOf = d => C.categoriesOf(d) || [];
@@ -2672,6 +7017,34 @@ function buildCatChips() {
       render();
     });
   });
+  syncCategoryOverflow();
+}
+
+function syncCategoryOverflow() {
+  const container = document.getElementById('catChips');
+  const toggle = document.getElementById('catToggle');
+  if (!container || !toggle) return;
+
+  const hasCats = container.children.length > 0;
+  container.hidden = !hasCats;
+  if (!hasCats) {
+    toggle.hidden = true;
+    return;
+  }
+
+  container.classList.toggle('is-expanded', catExpanded);
+  container.classList.toggle('is-collapsed', !catExpanded);
+
+  const needsToggle = container.scrollHeight > container.clientHeight + 2 || container.children.length > 16;
+  if (!needsToggle) {
+    catExpanded = false;
+    container.classList.remove('is-expanded');
+    container.classList.add('is-collapsed');
+  }
+
+  toggle.hidden = !needsToggle;
+  toggle.textContent = catExpanded ? '收起标签' : `展开 ${container.children.length} 个标签`;
+  toggle.setAttribute('aria-expanded', String(catExpanded));
 }
 
 function buildStatsbar() {
@@ -2900,8 +7273,19 @@ document.querySelectorAll('[data-f]').forEach(b => {
 });
 if (initState.cat) {
   const cbtn = [...document.querySelectorAll('.cat-chip')].find(b => b.dataset.cat === initState.cat);
-  if (cbtn) { cbtn.classList.add('active'); cbtn.setAttribute('aria-pressed', 'true'); curCat = initState.cat; }
+  if (cbtn) {
+    cbtn.classList.add('active');
+    cbtn.setAttribute('aria-pressed', 'true');
+    curCat = initState.cat;
+    catExpanded = true;
+    syncCategoryOverflow();
+  }
 }
+document.getElementById('catToggle').addEventListener('click', () => {
+  catExpanded = !catExpanded;
+  syncCategoryOverflow();
+});
+window.addEventListener('resize', syncCategoryOverflow);
 
 document.body.classList.add('anim-on');
 render();
